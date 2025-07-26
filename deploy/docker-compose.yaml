@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: im-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: im
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: im-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+    restart: always
+
+  etcd:
+    image: bitnami/etcd:latest
+    container_name: im-etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+    ports:
+      - "2379:2379"
+    restart: always
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: im-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    restart: always
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: im-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    depends_on:
+      - zookeeper
+    restart: always
