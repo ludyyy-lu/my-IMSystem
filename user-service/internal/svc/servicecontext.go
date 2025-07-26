@@ -1,6 +1,6 @@
 package svc
 
-import "my-IMSystem/user-service/user/internal/config"
+import "my-IMSystem/user-service/internal/config"
 
 type ServiceContext struct {
 	Config config.Config
