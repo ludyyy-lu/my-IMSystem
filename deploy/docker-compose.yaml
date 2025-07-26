@@ -44,15 +44,15 @@ services:
     restart: always
 
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.6
     container_name: im-kafka
     ports:
-      - "9092:9092"
+      - "9093:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093
       ALLOW_PLAINTEXT_LISTENER: "yes"
     depends_on:
       - zookeeper

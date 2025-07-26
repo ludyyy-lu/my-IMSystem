@@ -1,0 +1,13 @@
+# 忽略 MySQL 的数据目录
+deploy/mysql/data/
+
+# 忽略 Kafka、Redis、Zookeeper 等容器数据（视情况添加）
+deploy/kafka/data/
+deploy/zookeeper/data/
+deploy/redis/data/
+
+# 忽略操作系统或 IDE 生成的文件
+.DS_Store
+*.log
+*.tmp
+*.sock
