@@ -11,3 +11,4 @@ deploy/redis/data/
 *.log
 *.tmp
 *.sock
+*.mod
