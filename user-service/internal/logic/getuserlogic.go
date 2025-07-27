@@ -2,9 +2,11 @@ package logic
 
 import (
 	"context"
+	"errors"
 
+	"my-IMSystem/user-service/internal/model"
 	"my-IMSystem/user-service/internal/svc"
-	user_user "my-IMSystem/user-service/user"
+	"my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -23,8 +25,16 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 	}
 }
 
-func (l *GetUserLogic) GetUser(in *user_user.GetUserRequest) (*user_user.GetUserResponse, error) {
+func (l *GetUserLogic) GetUser(in *user.GetUserRequest) (*user.GetUserResponse, error) {
 	// todo: add your logic here and delete this line
+	// 根据uid查询用户信息
+	var u model.User
+	if err := l.svcCtx.DB.First(&u, in.Uid).Error; err != nil {
+		return nil, errors.New("用户不存在")
+	}
 
-	return &user_user.GetUserResponse{}, nil
+	return &user.GetUserResponse{
+		Uid:      int64(u.ID),
+		Username: u.Username,
+	}, nil
 }
