@@ -2,15 +2,16 @@ package logic
 
 import (
 	"context"
-	"time"
 
 	"my-IMSystem/user-service/internal/model"
 	"my-IMSystem/user-service/internal/svc"
 	"my-IMSystem/user-service/user"
-
-	"github.com/golang-jwt/jwt/v4"
+	"my-IMSystem/pkg/jwt"
+	// "github.com/golang-jwt/jwt/v5"
 	"github.com/zeromicro/go-zero/core/logx"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type LoginLogic struct {
@@ -44,27 +45,13 @@ func (l *LoginLogic) Login(in *user.LoginRequest) (*user.LoginResponse, error) {
 		}, nil
 	}
 
-	// 3. 生成 JWT Token
-	token, err := generateJWT(u.ID)
+	token, err := jwt.GenerateToken(u.ID)
 	if err != nil {
-		return &user.LoginResponse{
-			Message: "生成Token失败",
-		}, nil
+		return nil, status.Errorf(codes.Internal, "token 生成失败: %v", err)
 	}
 
 	return &user.LoginResponse{
 		Token:   token,
 		Message: "登录成功",
 	}, nil
-}
-
-func generateJWT(uid int64) (string, error) {
-	claims := jwt.MapClaims{
-		"uid": uid,
-		"exp": time.Now().Add(24 * time.Hour).Unix(), // 有效期一天
-		"iat": time.Now().Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte("secret123"))
 }

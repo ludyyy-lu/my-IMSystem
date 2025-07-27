@@ -4,14 +4,17 @@ import (
 	"log"
 	"my-IMSystem/user-service/internal/config"
 	"my-IMSystem/user-service/internal/model"
+	"my-IMSystem/user-service/middleware"
 
+	"github.com/zeromicro/go-zero/rest"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
-	Config config.Config
-	DB     *gorm.DB
+	Config         config.Config
+	DB             *gorm.DB
+	AuthMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -28,12 +31,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	return &ServiceContext{
-		Config: c,
-		DB:     db,
+		Config:         c,
+		DB:             db,
+		AuthMiddleware: middleware.NewAuthMiddleware().Handle, // 使用自定义的认证中间件
 	}
-
-	// model.InitDB(c.Mysql.DataSource) //解耦调用
-	// return &ServiceContext{
-	// 	Config: c,
-	// }
 }
