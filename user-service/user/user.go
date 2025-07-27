@@ -15,6 +15,7 @@ type (
 	User interface {
 		Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	}
 
 	defaultUser struct {
@@ -36,4 +37,9 @@ func (m *defaultUser) Register(ctx context.Context, in *RegisterRequest, opts ..
 func (m *defaultUser) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	client := NewUserClient(m.cli.Conn())
 	return client.GetUser(ctx, in, opts...)
+}
+
+func (m *defaultUser) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	client := NewUserClient(m.cli.Conn())
+	return client.Login(ctx, in, opts...)
 }

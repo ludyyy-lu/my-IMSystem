@@ -224,6 +224,110 @@ func (x *GetUserResponse) GetUsername() string {
 	return ""
 }
 
+type LoginRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginRequest) Reset() {
+	*x = LoginRequest{}
+	mi := &file_common_proto_user_user_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginRequest) ProtoMessage() {}
+
+func (x *LoginRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_user_user_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginRequest.ProtoReflect.Descriptor instead.
+func (*LoginRequest) Descriptor() ([]byte, []int) {
+	return file_common_proto_user_user_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *LoginRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *LoginRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type LoginResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginResponse) Reset() {
+	*x = LoginResponse{}
+	mi := &file_common_proto_user_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginResponse) ProtoMessage() {}
+
+func (x *LoginResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_user_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginResponse.ProtoReflect.Descriptor instead.
+func (*LoginResponse) Descriptor() ([]byte, []int) {
+	return file_common_proto_user_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *LoginResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *LoginResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_common_proto_user_user_proto protoreflect.FileDescriptor
 
 const file_common_proto_user_user_proto_rawDesc = "" +
@@ -239,10 +343,17 @@ const file_common_proto_user_user_proto_rawDesc = "" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\"?\n" +
 	"\x0fGetUserResponse\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername2y\n" +
+	"\busername\x18\x02 \x01(\tR\busername\"F\n" +
+	"\fLoginRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"?\n" +
+	"\rLoginResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xab\x01\n" +
 	"\x04User\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x126\n" +
-	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponseB\rZ\v./user;userb\x06proto3"
+	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponse\x120\n" +
+	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponseB\rZ\v./user;userb\x06proto3"
 
 var (
 	file_common_proto_user_user_proto_rawDescOnce sync.Once
@@ -256,20 +367,24 @@ func file_common_proto_user_user_proto_rawDescGZIP() []byte {
 	return file_common_proto_user_user_proto_rawDescData
 }
 
-var file_common_proto_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_common_proto_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_common_proto_user_user_proto_goTypes = []any{
 	(*RegisterRequest)(nil),  // 0: user.RegisterRequest
 	(*RegisterResponse)(nil), // 1: user.RegisterResponse
 	(*GetUserRequest)(nil),   // 2: user.GetUserRequest
 	(*GetUserResponse)(nil),  // 3: user.GetUserResponse
+	(*LoginRequest)(nil),     // 4: user.LoginRequest
+	(*LoginResponse)(nil),    // 5: user.LoginResponse
 }
 var file_common_proto_user_user_proto_depIdxs = []int32{
 	0, // 0: user.User.Register:input_type -> user.RegisterRequest
 	2, // 1: user.User.GetUser:input_type -> user.GetUserRequest
-	1, // 2: user.User.Register:output_type -> user.RegisterResponse
-	3, // 3: user.User.GetUser:output_type -> user.GetUserResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	4, // 2: user.User.Login:input_type -> user.LoginRequest
+	1, // 3: user.User.Register:output_type -> user.RegisterResponse
+	3, // 4: user.User.GetUser:output_type -> user.GetUserResponse
+	5, // 5: user.User.Login:output_type -> user.LoginResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -286,7 +401,7 @@ func file_common_proto_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_user_user_proto_rawDesc), len(file_common_proto_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
