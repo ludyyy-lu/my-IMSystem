@@ -9,7 +9,7 @@ import (
 
 	"my-IMSystem/user-service/internal/logic"
 	"my-IMSystem/user-service/internal/svc"
-	"my-IMSystem/user-service/user"
+	user_user "my-IMSystem/user-service/user"
 )
 
 type UserServer struct {

@@ -7,7 +7,7 @@ import (
 	"my-IMSystem/user-service/internal/config"
 	"my-IMSystem/user-service/internal/server"
 	"my-IMSystem/user-service/internal/svc"
-	"my-IMSystem/user-service/user"
+	user_user "my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
