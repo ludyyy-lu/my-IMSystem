@@ -10,6 +10,8 @@ option go_package = "./user;user";
 // 字段编号在 Protobuf 中是必须的，用于序列化和反序
 
 // 注册请求：包含用户名和密码
+
+// 用户注册
 message RegisterRequest {
   string username = 1;  // 字段类型 字段名 = 字段编号
   string password = 2;
@@ -20,6 +22,7 @@ message RegisterResponse {
   string message = 2;
 }
 
+// 用户查询
 message GetUserRequest {
   int64 uid = 1;
 }
@@ -29,7 +32,7 @@ message GetUserResponse {
   string username = 2;
 }
 
-
+// 用户登录
 message LoginRequest {
   string username = 1;
   string password = 2;
@@ -40,9 +43,16 @@ message LoginResponse {
   string message = 2;
 }
 
+// 获取用户个人资料
+message GetProfileRequest {}
+message GetProfileResponse {
+  int64 uid = 1;
+  string username = 2;
+}
 // 服务定义（RPC 接口）
 service User {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
 }

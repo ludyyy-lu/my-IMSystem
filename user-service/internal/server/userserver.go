@@ -9,12 +9,12 @@ import (
 
 	"my-IMSystem/user-service/internal/logic"
 	"my-IMSystem/user-service/internal/svc"
-	"my-IMSystem/user-service/user"
+	user_user "my-IMSystem/user-service/user"
 )
 
 type UserServer struct {
 	svcCtx *svc.ServiceContext
-	user.UnimplementedUserServer
+	user_user.UnimplementedUserServer
 }
 
 func NewUserServer(svcCtx *svc.ServiceContext) *UserServer {
@@ -23,17 +23,22 @@ func NewUserServer(svcCtx *svc.ServiceContext) *UserServer {
 	}
 }
 
-func (s *UserServer) Register(ctx context.Context, in *user.RegisterRequest) (*user.RegisterResponse, error) {
+func (s *UserServer) Register(ctx context.Context, in *user_user.RegisterRequest) (*user_user.RegisterResponse, error) {
 	l := logic.NewRegisterLogic(ctx, s.svcCtx)
 	return l.Register(in)
 }
 
-func (s *UserServer) GetUser(ctx context.Context, in *user.GetUserRequest) (*user.GetUserResponse, error) {
+func (s *UserServer) GetUser(ctx context.Context, in *user_user.GetUserRequest) (*user_user.GetUserResponse, error) {
 	l := logic.NewGetUserLogic(ctx, s.svcCtx)
 	return l.GetUser(in)
 }
 
-func (s *UserServer) Login(ctx context.Context, in *user.LoginRequest) (*user.LoginResponse, error) {
+func (s *UserServer) Login(ctx context.Context, in *user_user.LoginRequest) (*user_user.LoginResponse, error) {
 	l := logic.NewLoginLogic(ctx, s.svcCtx)
 	return l.Login(in)
+}
+
+func (s *UserServer) GetProfile(ctx context.Context, in *user_user.GetProfileRequest) (*user_user.GetProfileResponse, error) {
+	l := logic.NewGetProfileLogic(ctx, s.svcCtx)
+	return l.GetProfile(ctx,in)
 }
