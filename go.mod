@@ -9,6 +9,13 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/go-sql-driver/mysql v1.9.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+)
+
+require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -80,6 +87,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/gorm v1.30.1
 	k8s.io/api v0.29.3 // indirect
 	k8s.io/apimachinery v0.29.4 // indirect
 	k8s.io/client-go v0.29.3 // indirect
