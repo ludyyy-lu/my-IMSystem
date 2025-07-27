@@ -10,7 +10,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	model.InitDB()
+	model.InitDB(c.Mysql.DataSource) //解耦调用
 	return &ServiceContext{
 		Config: c,
 	}

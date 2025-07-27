@@ -10,8 +10,8 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() {
-	dsn := "imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local"
+func InitDB(dsn string) {
+	// dsn := "imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local"
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

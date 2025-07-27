@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 )
-
+// 用户结构表
 type User struct {
 	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	Username  string    `gorm:"unique;not null;size:64" json:"username"`
