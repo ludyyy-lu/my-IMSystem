@@ -40,5 +40,5 @@ func (s *UserServer) Login(ctx context.Context, in *user_user.LoginRequest) (*us
 
 func (s *UserServer) GetProfile(ctx context.Context, in *user_user.GetProfileRequest) (*user_user.GetProfileResponse, error) {
 	l := logic.NewGetProfileLogic(ctx, s.svcCtx)
-	return l.GetProfile(ctx,in)
+	return l.GetProfile(in)
 }

@@ -2,13 +2,14 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
-	"my-IMSystem/user-service/internal/model"
+	"my-IMSystem/pkg/jwt"
 	"my-IMSystem/user-service/internal/svc"
 	"my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 )
 
 type GetProfileLogic struct {
@@ -25,28 +26,34 @@ func NewGetProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPro
 	}
 }
 
-func (l *GetProfileLogic) GetProfile(ctx context.Context, req *user.GetProfileRequest) (*user.GetProfileResponse, error) {
-	// 1. 从 ctx 中取出 uid（我们等会会把它注入进来）
-	uidVal := ctx.Value("uid")
-	if uidVal == nil {
-		return nil, status.Error(401, "未授权访问")
+func (l *GetProfileLogic) GetProfile(in *user.GetProfileRequest) (*user.GetProfileResponse, error) {
+	// Step 1: 从 metadata 中提取 token
+	md, ok := metadata.FromIncomingContext(l.ctx)
+	if !ok || len(md["authorization"]) == 0 {
+		return nil, fmt.Errorf("缺少 token")
 	}
-	uid := uidVal.(int64)
+	token := md["authorization"][0]
 
-	// 2. 查询数据库
-	var u model.User
-	if err := l.svcCtx.DB.Where("id = ?", uid).First(&u).Error; err != nil {
-		return nil, status.Error(500, "查询用户失败")
+	// Step 2: 解析 token 拿到 uid
+	claims, err := jwt.ParseToken(token)
+	if err != nil {
+		return nil, fmt.Errorf("无效 token: %v", err)
+	}
+	uid := claims.Uid
+
+	// Step 3: 查数据库
+	var userModel struct {
+		ID       int64  `gorm:"column:id"`
+		Username string `gorm:"column:username"`
+	}
+	if err := l.svcCtx.DB.Table("users").Where("id = ?", uid).First(&userModel).Error; err != nil {
+		return nil, err
 	}
 
-	// 3. 返回响应
+	// Step 4: 构造响应
 	return &user.GetProfileResponse{
-		Uid:      u.ID,
-		Username: u.Username,
+		Uid:      userModel.ID,
+		Username: userModel.Username,
+		Avatar:   "https://i.imgtg.com/2023/11/30/avatar.png", // 先写死
 	}, nil
 }
-
-// func (l *GetProfileLogic) GetProfile(in *user.GetProfileRequest) (*user.GetProfileResponse, error) {
-// 	// todo: add your logic here and delete this line
-// 	return &user.GetProfileResponse{}, nil
-// }

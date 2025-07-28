@@ -371,6 +371,7 @@ type GetProfileResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"` // 头像 URL，暂不支持
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -419,6 +420,13 @@ func (x *GetProfileResponse) GetUsername() string {
 	return ""
 }
 
+func (x *GetProfileResponse) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
 var File_common_proto_user_user_proto protoreflect.FileDescriptor
 
 const file_common_proto_user_user_proto_rawDesc = "" +
@@ -441,10 +449,11 @@ const file_common_proto_user_user_proto_rawDesc = "" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"\x13\n" +
-	"\x11GetProfileRequest\"B\n" +
+	"\x11GetProfileRequest\"Z\n" +
 	"\x12GetProfileResponse\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername2\xec\x01\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x16\n" +
+	"\x06avatar\x18\x03 \x01(\tR\x06avatar2\xec\x01\n" +
 	"\x04User\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x126\n" +
 	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponse\x120\n" +
