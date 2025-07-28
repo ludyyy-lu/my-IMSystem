@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"my-IMSystem/friend-service/friend"
+	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"

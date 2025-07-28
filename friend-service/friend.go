@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"my-IMSystem/friend-service/friend"
+	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/config"
 	"my-IMSystem/friend-service/internal/server"
 	"my-IMSystem/friend-service/internal/svc"
