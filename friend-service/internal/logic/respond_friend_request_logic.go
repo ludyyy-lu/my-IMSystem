@@ -2,8 +2,10 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	friend_friend "my-IMSystem/friend-service/friend"
+	"my-IMSystem/friend-service/internal/model"
 	"my-IMSystem/friend-service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -25,6 +27,38 @@ func NewRespondFriendRequestLogic(ctx context.Context, svcCtx *svc.ServiceContex
 
 func (l *RespondFriendRequestLogic) RespondFriendRequest(in *friend_friend.RespondFriendRequestRequest) (*friend_friend.RespondFriendRequestResponse, error) {
 	// todo: add your logic here and delete this line
+	// 1. 查询请求是否存在
+	var fr model.FriendRequest
+	if err := l.svcCtx.DB.First(&fr, in.RequestId).Error; err != nil {
+		return nil, errors.New("好友请求不存在")
+	}
 
-	return &friend_friend.RespondFriendRequestResponse{}, nil
+	if fr.Status != "pending" {
+		return nil, errors.New("该好友请求已处理过")
+	}
+
+	if in.Accept {
+		// 2. 更新请求状态为 accepted
+		fr.Status = "accepted"
+		if err := l.svcCtx.DB.Save(&fr).Error; err != nil {
+			return nil, err
+		}
+
+		// 3. 创建好友关系（双向插入）  // 原子性
+		friendPairs := []model.Friend{
+			{UserID: fr.FromUserID, FriendID: fr.ToUserID},
+			{UserID: fr.ToUserID, FriendID: fr.FromUserID},
+		}
+		if err := l.svcCtx.DB.Create(&friendPairs).Error; err != nil {
+			return nil, err
+		}
+		return &friend_friend.RespondFriendRequestResponse{Message: "已接受好友请求"}, nil
+	} else {
+		// 拒绝：更新请求状态为 rejected
+		fr.Status = "rejected"
+		if err := l.svcCtx.DB.Save(&fr).Error; err != nil {
+			return nil, err
+		}
+		return &friend_friend.RespondFriendRequestResponse{Message: "已拒绝好友请求"}, nil
+	}
 }
