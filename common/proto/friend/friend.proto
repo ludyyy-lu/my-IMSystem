@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package friend;
+option go_package = "./friend;friend";
+
+enum RequestStatus {
+  PENDING = 0;
+  ACCEPTED = 1;
+  REJECTED = 2;
+}
+
+// 添加好友请求
+// 发起好友请求
+message SendFriendRequestRequest {
+  int64 from_user_id = 1;
+  int64 to_user_id = 2;
+  string remark = 3; // 申请备注
+}
+
+message SendFriendRequestResponse {
+  string message = 1;
+}
+
+// 获取“我收到的”好友请求
+message GetFriendRequestsRequest {
+  int64 user_id = 1;
+}
+
+message FriendRequest {
+  int64 request_id = 1;
+  int64 from_user_id = 2;
+  string from_username = 3;
+  string remark = 4;
+  string status = 5; // pending / accepted / rejected
+}
+
+message GetFriendRequestsResponse {
+  repeated FriendRequest requests = 1;
+}
+
+
+// 处理好友请求（接受 / 拒绝）
+message RespondFriendRequestRequest {
+  int64 request_id = 1;
+  bool accept = 2;
+}
+
+message RespondFriendRequestResponse {
+  string message = 1;
+}
+
+// 删除好友请求
+message DeleteFriendRequest {
+  int64 user_id = 1;
+  int64 friend_id = 2;
+}
+
+message DeleteFriendResponse {
+  string message = 1;
+}
+
+// 获取好友列表请求
+message GetFriendsRequest {
+  int64 user_id = 1;
+}
+
+message FriendInfo {
+  int64 friend_id = 1;
+  string username = 2;
+}
+
+message GetFriendsResponse {
+  repeated FriendInfo friends = 1;
+}
+
+// 定义服务接口
+service Friend {
+  rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse);
+  rpc GetFriendRequests(GetFriendRequestsRequest) returns (GetFriendRequestsResponse);
+  rpc RespondFriendRequest(RespondFriendRequestRequest) returns (RespondFriendRequestResponse);
+  rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
+  rpc DeleteFriend(DeleteFriendRequest) returns (DeleteFriendResponse);
+}
