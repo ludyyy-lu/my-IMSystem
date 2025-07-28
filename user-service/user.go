@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"my-IMSystem/user-service/internal/config"
+	"my-IMSystem/user-service/internal/interceptor"
 	"my-IMSystem/user-service/internal/server"
 	"my-IMSystem/user-service/internal/svc"
 	user_user "my-IMSystem/user-service/user"
@@ -32,6 +33,8 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+
+	s.AddUnaryInterceptors(interceptor.AuthInterceptor)
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
