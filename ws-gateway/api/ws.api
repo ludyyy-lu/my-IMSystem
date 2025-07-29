@@ -1,0 +1,23 @@
+// ws.api
+syntax = "v1"
+
+info (
+	title:  "IM WebSocket Gateway"
+	desc:   "WebSocket 连接网关"
+	author: "ludy"
+)
+
+type (
+	ConnectReq {
+		token string `json:"token"` // 客户端连接时传入的 JWT token
+	}
+	ConnectResp {
+		message string `json:"message"`
+	}
+)
+
+service ws-api {
+	@handler connect
+	get /ws/connect (ConnectReq) returns (ConnectResp)
+}
+
