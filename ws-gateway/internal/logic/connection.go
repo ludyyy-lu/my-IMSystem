@@ -75,15 +75,14 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 
 		log.Printf("Parsed message from %d: %+v", userId, message)
 
-		switch message.Type {
-		case "chat":
-			handleChatMessage(svcCtx, userId, message)
-		default:
-			log.Printf("Unknown message type from user %d: %s", userId, message.Type)
-		}
-
-		// ✅ 示例处理逻辑（你未来要解析 msg 并路由到 chat-service 或 Kafka）
-		// processMessage(userId, msg)
+		// switch message.Type {
+		// case "chat":
+		// 	handleChatMessage(svcCtx, userId, message)
+		// default:
+		// 	log.Printf("Unknown message type from user %d: %s", userId, message.Type)
+		// }
+		// ✅ 使用消息分发器
+		RouteMessage(svcCtx, userId, message)
 	}
 }
 
