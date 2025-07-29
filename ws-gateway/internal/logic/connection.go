@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/svc"
 
 	"github.com/gorilla/websocket"
@@ -15,13 +16,6 @@ const (
 	pongWait   = 60 * time.Second
 	pingPeriod = 50 * time.Second
 )
-
-// 定义消息格式
-type Message struct {
-	Type    string `json:"type"`    // 消息类型，如 chat、add_friend、heartbeat
-	To      int64  `json:"to"`      // 接收方 userId
-	Content string `json:"content"` // 消息内容
-}
 
 // 每一个前端 WebSocket 客户端成功连接后，服务端用来处理这条连接的主函数
 func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *websocket.Conn) {
@@ -67,31 +61,25 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 			break
 		}
 
-		var message Message
+		var message model.Message
 		if err := json.Unmarshal(msg, &message); err != nil {
 			log.Printf("Invalid message from user %d: %v\nRaw: %s", userId, err, string(msg))
 			continue
 		}
 
 		log.Printf("Parsed message from %d: %+v", userId, message)
-
-		// switch message.Type {
-		// case "chat":
-		// 	handleChatMessage(svcCtx, userId, message)
-		// default:
-		// 	log.Printf("Unknown message type from user %d: %s", userId, message.Type)
-		// }
 		// ✅ 使用消息分发器
 		RouteMessage(svcCtx, userId, message)
 	}
 }
 
 // 临时处理chat信息
-func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg Message) {
+func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Message) {
 	toConn, _ := svcCtx.ConnManager.Get(msg.To)
 	if toConn == nil {
 		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
 		// TODO: 存入离线消息
+		svcCtx.OfflineStore.Add(msg.To, msg)
 		return
 	}
 
