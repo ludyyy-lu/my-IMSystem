@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"time"
@@ -15,6 +16,14 @@ const (
 	pingPeriod = 50 * time.Second
 )
 
+// 定义消息格式
+type Message struct {
+	Type    string `json:"type"`    // 消息类型，如 chat、add_friend、heartbeat
+	To      int64  `json:"to"`      // 接收方 userId
+	Content string `json:"content"` // 消息内容
+}
+
+// 每一个前端 WebSocket 客户端成功连接后，服务端用来处理这条连接的主函数
 func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *websocket.Conn) {
 	// ✅ 1. 加入连接池
 	svcCtx.ConnManager.Add(userId, conn)
@@ -58,9 +67,44 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 			break
 		}
 
-		log.Printf("Received from %d: %s", userId, string(msg))
+		var message Message
+		if err := json.Unmarshal(msg, &message); err != nil {
+			log.Printf("Invalid message from user %d: %v\nRaw: %s", userId, err, string(msg))
+			continue
+		}
+
+		log.Printf("Parsed message from %d: %+v", userId, message)
+
+		switch message.Type {
+		case "chat":
+			handleChatMessage(svcCtx, userId, message)
+		default:
+			log.Printf("Unknown message type from user %d: %s", userId, message.Type)
+		}
 
 		// ✅ 示例处理逻辑（你未来要解析 msg 并路由到 chat-service 或 Kafka）
 		// processMessage(userId, msg)
+	}
+}
+
+// 临时处理chat信息
+func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg Message) {
+	toConn, _ := svcCtx.ConnManager.Get(msg.To)
+	if toConn == nil {
+		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
+		// TODO: 存入离线消息
+		return
+	}
+
+	// 构建返回消息
+	resp := map[string]interface{}{
+		"type":    "chat",
+		"from":    fromUserId,
+		"content": msg.Content,
+	}
+	respBytes, _ := json.Marshal(resp)
+	err := toConn.WriteMessage(websocket.TextMessage, respBytes)
+	if err != nil {
+		log.Printf("Failed to send message to user %d: %v", msg.To, err)
 	}
 }
