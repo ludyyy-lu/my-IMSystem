@@ -26,7 +26,23 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 		conn.Close()
 		log.Printf("User %d disconnected", userId)
 	}()
-
+	// ✅ 1.1 拉取 Redis 中的离线消息
+	offlineMsgs, err := svcCtx.OfflineStore.LoadAndDelete(userId)
+	if err != nil {
+		log.Printf("Failed to load offline messages for user %d: %v", userId, err)
+	} else {
+		for _, m := range offlineMsgs {
+			resp := map[string]interface{}{
+				"type":    "chat",
+				"from":    m.From,
+				"content": m.Content,
+			}
+			respBytes, _ := json.Marshal(resp)
+			if err := conn.WriteMessage(websocket.TextMessage, respBytes); err != nil {
+				log.Printf("Failed to deliver offline message to user %d: %v", userId, err)
+			}
+		}
+	}
 	// ✅ 2. 设置心跳超时 & Pong handler
 	conn.SetReadDeadline(time.Now().Add(pongWait))
 	conn.SetPongHandler(func(string) error {
@@ -79,7 +95,11 @@ func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.M
 	if toConn == nil {
 		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
 		// TODO: 存入离线消息
-		svcCtx.OfflineStore.Add(msg.To, msg)
+		// ✅ 存入 Redis 离线消息
+		msg.From = fromUserId // 补充发送者字段
+		if err := svcCtx.OfflineStore.Save(msg.To, msg); err != nil {
+			log.Printf("Failed to store offline message for user %d: %v", msg.To, err)
+		}
 		return
 	}
 
