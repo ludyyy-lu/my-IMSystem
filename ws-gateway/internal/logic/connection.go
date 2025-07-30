@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"my-IMSystem/ws-gateway/internal/kafka"
 	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/svc"
 
@@ -89,29 +90,41 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 	}
 }
 
-// 临时处理chat信息
 func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Message) {
-	toConn, _ := svcCtx.ConnManager.Get(msg.To)
-	if toConn == nil {
-		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
-		// TODO: 存入离线消息
-		// ✅ 存入 Redis 离线消息
-		msg.From = fromUserId // 补充发送者字段
-		if err := svcCtx.OfflineStore.Save(msg.To, msg); err != nil {
-			log.Printf("Failed to store offline message for user %d: %v", msg.To, err)
-		}
-		return
-	}
+	// ✅ 设置发送者 ID
+	msg.From = fromUserId
 
-	// 构建返回消息
-	resp := map[string]interface{}{
-		"type":    "chat",
-		"from":    fromUserId,
-		"content": msg.Content,
-	}
-	respBytes, _ := json.Marshal(resp)
-	err := toConn.WriteMessage(websocket.TextMessage, respBytes)
+	// ✅ 发送到 Kafka（即便用户在线，也不在这里推送）
+	err := kafka.SendMessage(msg)
 	if err != nil {
-		log.Printf("Failed to send message to user %d: %v", msg.To, err)
+		log.Printf("Failed to send message to Kafka: %v", err)
 	}
 }
+
+
+// 临时处理chat信息
+// func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Message) {
+// 	toConn, _ := svcCtx.ConnManager.Get(msg.To)
+// 	if toConn == nil {
+// 		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
+// 		// TODO: 存入离线消息
+// 		// ✅ 存入 Redis 离线消息
+// 		msg.From = fromUserId // 补充发送者字段
+// 		if err := svcCtx.OfflineStore.Save(msg.To, msg); err != nil {
+// 			log.Printf("Failed to store offline message for user %d: %v", msg.To, err)
+// 		}
+// 		return
+// 	}
+
+// 	// 构建返回消息
+// 	resp := map[string]interface{}{
+// 		"type":    "chat",
+// 		"from":    fromUserId,
+// 		"content": msg.Content,
+// 	}
+// 	respBytes, _ := json.Marshal(resp)
+// 	err := toConn.WriteMessage(websocket.TextMessage, respBytes)
+// 	if err != nil {
+// 		log.Printf("Failed to send message to user %d: %v", msg.To, err)
+// 	}
+// }
