@@ -10,4 +10,45 @@ message ChatMessage {
   string content = 3;
   int64 timestamp = 4;
   string message_id = 5; // 可选，用于去重/ack
+  bool is_read = 6; // 是否已读
+}
+
+message SendMessageReq {
+  int64 from_user_id = 1;  // 发送者
+  int64 to_user_id = 2;    // 接收者
+  string content = 3;      // 消息内容
+}
+
+message SendMessageResp {
+  string status = 1;       // 状态 OK / FAILED
+  string message_id = 2;   // 消息唯一ID（用于 ack）
+  int64 timestamp = 3;     // 服务端生成的发送时间
+}
+
+message GetChatHistoryReq {
+  int64 user_id = 1;        // 当前用户
+  int64 peer_id = 2;        // 对方用户
+  int64 limit = 3;          // 查询条数
+  int64 before_timestamp = 4; // 用于分页（查询某时间戳前的消息）
+}
+
+message GetChatHistoryResp {
+  repeated ChatMessage messages = 1;
+}
+
+message AckMessageReq {
+  string message_id = 1;
+  int64 user_id = 2;
+}
+
+message AckMessageResp {
+  string status = 1;
+}
+
+// ======== Service 定义 ========
+// 包叫什么 service叫什么名字 省得后来麻烦
+service Chat {
+  rpc SendMessage(SendMessageReq) returns (SendMessageResp);
+  rpc GetChatHistory(GetChatHistoryReq) returns (GetChatHistoryResp);
+  rpc AckMessage(AckMessageReq) returns (AckMessageResp);
 }
