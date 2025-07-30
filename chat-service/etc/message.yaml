@@ -10,3 +10,6 @@ Kafka:
     - kafka:9092
   Topic: im-chat-topic
   Group: chat-group
+
+Mysql:
+  DataSource: imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local
