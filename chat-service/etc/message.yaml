@@ -4,3 +4,9 @@ Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: message.rpc
+
+Kafka:
+  Brokers:
+    - kafka:9092
+  Topic: im-chat-topic
+  Group: chat-group
