@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"my-IMSystem/chat-service/chat"
+	chat_chat "my-IMSystem/chat-service/chat"
 	"my-IMSystem/chat-service/internal/logic"
 	"my-IMSystem/chat-service/internal/svc"
 )

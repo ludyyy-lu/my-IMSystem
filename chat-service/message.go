@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"my-IMSystem/chat-service/chat"
+	chat_chat "my-IMSystem/chat-service/chat"
 	"my-IMSystem/chat-service/internal/config"
 	"my-IMSystem/chat-service/internal/server"
 	"my-IMSystem/chat-service/internal/svc"

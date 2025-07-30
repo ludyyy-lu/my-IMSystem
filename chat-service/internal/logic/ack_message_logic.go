@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"my-IMSystem/chat-service/chat"
+	chat_chat "my-IMSystem/chat-service/chat"
 	"my-IMSystem/chat-service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
