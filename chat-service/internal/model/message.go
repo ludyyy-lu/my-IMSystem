@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Message struct {
 	Id         int64     `gorm:"primaryKey" json:"id"`
@@ -14,4 +18,28 @@ type Message struct {
 
 func (Message) TableName() string {
 	return "message"
+}
+
+// GetChatMessages 查询两个用户之间的所有消息
+// 查询两人之间的消息（双向）
+// 只查早于某个时间戳之前的 （分页用）
+// 限制数量，按时间倒序排
+func GetChatMessages(db *gorm.DB, userId, peerId int64, limit int, before time.Time) ([]Message, error) {
+	var messages []Message
+
+	err := db.
+		Where(
+			"(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)",
+			userId, peerId, peerId, userId,
+		).
+		Where("created_at < ?", before).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&messages).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
 }
