@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -42,4 +44,25 @@ func GetChatMessages(db *gorm.DB, userId, peerId int64, limit int, before time.T
 	}
 
 	return messages, nil
+}
+
+// 修改消息为已读
+func MarkMessageAsRead(db *gorm.DB, messageID string, userID int64) error {
+	id, err := strconv.ParseInt(messageID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid message ID: %v", err)
+	}
+
+	// 条件必须匹配当前用户是接收者
+	result := db.Model(&Message{}).
+		Where("id = ? AND to_user_id = ?", id, userID).
+		Update("status", 1)
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("no message updated")
+	}
+	return nil
 }
