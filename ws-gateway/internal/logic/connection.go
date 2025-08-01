@@ -1,11 +1,13 @@
 package logic
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"time"
 
+	"my-IMSystem/chat-service/chat"
 	"my-IMSystem/ws-gateway/internal/kafka"
 	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/svc"
@@ -77,7 +79,7 @@ func HandleWebSocketConnection(svcCtx *svc.ServiceContext, userId int64, conn *w
 			}
 			break
 		}
-
+		// 消息类型判断
 		var message model.Message
 		if err := json.Unmarshal(msg, &message); err != nil {
 			log.Printf("Invalid message from user %d: %v\nRaw: %s", userId, err, string(msg))
@@ -101,30 +103,18 @@ func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.M
 	}
 }
 
-
-// 临时处理chat信息
-// func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Message) {
-// 	toConn, _ := svcCtx.ConnManager.Get(msg.To)
-// 	if toConn == nil {
-// 		log.Printf("User %d is offline. Cannot deliver message.\n", msg.To)
-// 		// TODO: 存入离线消息
-// 		// ✅ 存入 Redis 离线消息
-// 		msg.From = fromUserId // 补充发送者字段
-// 		if err := svcCtx.OfflineStore.Save(msg.To, msg); err != nil {
-// 			log.Printf("Failed to store offline message for user %d: %v", msg.To, err)
-// 		}
-// 		return
-// 	}
-
-// 	// 构建返回消息
-// 	resp := map[string]interface{}{
-// 		"type":    "chat",
-// 		"from":    fromUserId,
-// 		"content": msg.Content,
-// 	}
-// 	respBytes, _ := json.Marshal(resp)
-// 	err := toConn.WriteMessage(websocket.TextMessage, respBytes)
-// 	if err != nil {
-// 		log.Printf("Failed to send message to user %d: %v", msg.To, err)
-// 	}
-// }
+func handleAckMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Message) {
+	messageID := msg.Content
+	// 调用 chat-service 的 RPC 接口，传递 ACK 请求
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	resp, err := svcCtx.ChatRpc.AckMessage(ctx, &chat.AckMessageReq{
+		MessageId: messageID,
+		UserId:    fromUserId,
+	})
+	if err != nil {
+		log.Printf("❌ Failed to send ACK to chat-service: %v", err)
+	} else {
+		log.Printf("✅ ACK sent for message %s from user %d | resp: %+v", messageID, fromUserId, resp)
+	}
+}

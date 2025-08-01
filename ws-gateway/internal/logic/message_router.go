@@ -12,6 +12,7 @@ type MessageHandler func(svcCtx *svc.ServiceContext, fromUserId int64, msg model
 // 消息类型路由表
 var messageRouter = map[string]MessageHandler{
 	"chat": handleChatMessage,
+	"ack":  handleAckMessage,
 	// 未来可以加： "add_friend": handleAddFriendMessage,
 }
 

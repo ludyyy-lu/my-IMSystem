@@ -11,3 +11,8 @@ Kafka:
   Brokers:
     - kafka:9092
   Topic: im-chat-topic
+
+ChatRpcConf:
+  Endpoints:
+    - 127.0.0.1:8081  
+  Timeout: 3000
