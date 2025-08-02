@@ -3,7 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
+	"my-IMSystem/common/common_model"
+	"my-IMSystem/common/kafka"
 	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/model"
 	"my-IMSystem/friend-service/internal/svc"
@@ -52,12 +55,32 @@ func (l *RespondFriendRequestLogic) RespondFriendRequest(in *friend_friend.Respo
 		if err := l.svcCtx.DB.Create(&friendPairs).Error; err != nil {
 			return nil, err
 		}
+
+		if err := kafka.SendMessage("im-friend-topic", common_model.FriendEvent{
+			EventType: "request_accepted",
+			FromUser:  fr.FromUserID,
+			ToUser:    fr.ToUserID,
+			Timestamp: time.Now().Unix(),
+			Extra:     fr.Remark,
+		}); err != nil {
+			return nil, errors.New("failed to send friend request event to Kafka: " + err.Error())
+		}
+
 		return &friend_friend.RespondFriendRequestResponse{Message: "已接受好友请求"}, nil
 	} else {
 		// 拒绝：更新请求状态为 rejected
 		fr.Status = "rejected"
 		if err := l.svcCtx.DB.Save(&fr).Error; err != nil {
 			return nil, err
+		}
+		if err := kafka.SendMessage("im-friend-topic", common_model.FriendEvent{
+			EventType: "request_rejected",
+			FromUser:  fr.FromUserID,
+			ToUser:    fr.ToUserID,
+			Timestamp: time.Now().Unix(),
+			Extra:     fr.Remark,
+		}); err != nil {
+			return nil, errors.New("failed to send friend request event to Kafka: " + err.Error())
 		}
 		return &friend_friend.RespondFriendRequestResponse{Message: "已拒绝好友请求"}, nil
 	}
