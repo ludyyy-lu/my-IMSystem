@@ -1,4 +1,4 @@
-package model
+package common_model
 
 type FriendEventType string
 

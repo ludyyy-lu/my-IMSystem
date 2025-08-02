@@ -3,12 +3,12 @@ package helper
 import (
 	"encoding/json"
 	"my-IMSystem/common/kafka"
-	"my-IMSystem/common/model"
+	"my-IMSystem/common/common_model"
 	"time"
 )
 
-func SendFriendEventToKafka(eventType model.FriendEventType, fromUser, toUser int64, extra string) error {
-	event := model.FriendEvent{
+func SendFriendEventToKafka(eventType common_model.FriendEventType, fromUser, toUser int64, extra string) error {
+	event := common_model.FriendEvent{
 		EventType: eventType,
 		FromUser:  fromUser,
 		ToUser:    toUser,

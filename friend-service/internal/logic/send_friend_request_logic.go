@@ -3,7 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
+	"my-IMSystem/common/kafka"
+	"my-IMSystem/common/common_model"
 	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/model"
 	"my-IMSystem/friend-service/internal/svc"
@@ -53,7 +56,15 @@ func (l *SendFriendRequestLogic) SendFriendRequest(in *friend_friend.SendFriendR
 	if err := db.Create(&request).Error; err != nil {
 		return nil, err
 	}
-
+	if err := kafka.SendMessage("im-friend-topic", common_model.FriendEvent{
+		EventType: "request_sent",
+		FromUser:  in.FromUserId,
+		ToUser:    in.ToUserId,
+		Timestamp: time.Now().Unix(),
+		Extra:    in.Remark, // 附加信息
+	}); err != nil {
+		return nil, errors.New("failed to send friend request event to Kafka: " + err.Error())
+	}
 	return &friend_friend.SendFriendRequestResponse{
 		Message: "好友请求已发送",
 	}, nil
