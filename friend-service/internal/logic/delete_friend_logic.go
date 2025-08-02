@@ -2,7 +2,11 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"time"
 
+	"my-IMSystem/common/common_model"
+	"my-IMSystem/common/kafka"
 	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/model"
 	"my-IMSystem/friend-service/internal/svc"
@@ -43,7 +47,15 @@ func (l *DeleteFriendLogic) DeleteFriend(in *friend_friend.DeleteFriendRequest) 
 	if err != nil {
 		return nil, err
 	}
-
+	// 发送 Kafka 消息
+	if err := kafka.SendMessage("im-friend-topic", common_model.FriendEvent{
+		EventType: "friend_deleted",
+		FromUser:  in.UserId,
+		ToUser:    in.FriendId,
+		Timestamp: time.Now().Unix(),
+	}); err != nil {
+		return nil, errors.New("failed to send friend deletion event to Kafka: " + err.Error())
+	}
 	return &friend_friend.DeleteFriendResponse{
 		Message: "删除好友成功",
 	}, nil
