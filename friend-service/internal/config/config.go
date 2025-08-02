@@ -7,4 +7,8 @@ type Config struct {
 	Mysql struct {
 		DataSource string
 	}
+	Kafka struct {
+		Brokers []string
+		Topic   string
+	}
 }

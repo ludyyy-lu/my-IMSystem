@@ -2,6 +2,7 @@ package svc
 
 import (
 	"log"
+	"my-IMSystem/common/kafka"
 	"my-IMSystem/friend-service/internal/config"
 	"my-IMSystem/friend-service/internal/model"
 
@@ -19,13 +20,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err != nil {
 		log.Fatalf("failed to connect DB: %v", err)
 	}
-
 	// 自动建表
 	err = db.AutoMigrate(&model.FriendRequest{}, &model.Friend{})
 	if err != nil {
 		log.Fatalf("auto migration failed: %v", err)
 	}
-
+	kafka.InitKafkaWriter(c.Kafka.Brokers, c.Kafka.Topic)
 	return &ServiceContext{
 		Config: c,
 		DB:     db,
