@@ -3,12 +3,12 @@ package common_model
 type FriendEventType string
 
 const (
-	FriendRequestReceived FriendEventType = "FriendRequestReceived"
-	FriendRequestAccepted FriendEventType = "FriendRequestAccepted"
-	FriendRequestRejected FriendEventType = "FriendRequestRejected"
-	FriendDeleted         FriendEventType = "FriendDeleted"
-	UserBlocked           FriendEventType = "UserBlocked"
-	UserUnblocked         FriendEventType = "UserUnblocked"
+	FriendRequestReceived FriendEventType = "FriendRequestReceived" // 好友请求接收
+	FriendRequestAccepted FriendEventType = "FriendRequestAccepted" // 好友请求接受
+	FriendRequestRejected FriendEventType = "FriendRequestRejected" // 好友请求拒绝
+	FriendDeleted         FriendEventType = "FriendDeleted"         // 好友删除
+	UserBlocked           FriendEventType = "UserBlocked"           // 用户被屏蔽
+	UserUnblocked         FriendEventType = "UserUnblocked"         // 用户解除屏蔽
 )
 
 type FriendEvent struct {

@@ -10,7 +10,7 @@ Redis:
 Kafka:
   Brokers:
     - kafka:9092
-  Topic: im-chat-topic 
+  # Topic: im-chat-topic 
   ## 聊天消息（文字、图片、撤回等）
 
 ChatRpcConf:
