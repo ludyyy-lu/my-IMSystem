@@ -11,28 +11,28 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func StartFriendConsumer(brokers []string, topic string) {
+func StartChatConsumer(brokers []string, topic string) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: brokers,
 		Topic:   topic,
-		GroupID: "ws-gateway-friend-group",
+		GroupID: "ws-gateway-chat-group",
 	})
 	go func() {
 		for {
 			m, err := reader.ReadMessage(context.Background())
 			if err != nil {
-				log.Printf("Kafka read error: %v", err)
+				log.Printf("Kafka read error (chat): %v", err)
 				continue
 			}
 
-			var event common_model.FriendEvent
-			if err := json.Unmarshal(m.Value, &event); err != nil {
-				log.Printf("Failed to parse friend event: %v", err)
+			var msg common_model.ChatMessage
+			if err := json.Unmarshal(m.Value, &msg); err != nil {
+				log.Printf("Failed to parse chat message: %v", err)
 				continue
 			}
 
-			// 推送给接收者（ToUserID）
-			ws.PushToUser(event.ToUser, event)
+			// 调用 WebSocket 推送
+			ws.PushToUser(msg.ToUserId, msg)
 		}
 	}()
 }

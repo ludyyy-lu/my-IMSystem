@@ -2,15 +2,26 @@
 package ws
 
 import (
-	"my-IMSystem/ws-gateway/internal/conn"
 	"encoding/json"
 	"log"
+	"my-IMSystem/ws-gateway/internal/conn"
+
 	"github.com/gorilla/websocket"
 )
 
 func PushToUser(userId int64, payload interface{}) {
+	type PushMessage struct {
+		Type    string      `json:"type"`    // e.g. "friend_event"
+		Payload interface{} `json:"payload"` // 原始事件体
+	}
+	pushData := PushMessage{
+		Type:    "friend_event",
+		Payload: payload,
+	}
+	// data, err := json.Marshal(pushData)
+
 	// 将消息对象编码为 JSON 字节流
-	data, err := json.Marshal(payload)
+	data, err := json.Marshal(pushData)
 	if err != nil {
 		log.Printf("Failed to marshal push payload: %v", err)
 		return

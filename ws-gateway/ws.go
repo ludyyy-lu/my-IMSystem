@@ -30,6 +30,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	// 启动好友事件消费者
 	go kafka.StartFriendConsumer(c.Kafka.Brokers, "im-friend-topic")
+	go kafka.StartChatConsumer(c.Kafka.Brokers, "im-chat-topic")
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
