@@ -47,3 +47,8 @@ func (s *FriendServer) DeleteFriend(ctx context.Context, in *friend_friend.Delet
 	l := logic.NewDeleteFriendLogic(ctx, s.svcCtx)
 	return l.DeleteFriend(in)
 }
+
+func (s *FriendServer) BlockFriend(ctx context.Context, in *friend_friend.BlockFriendReq) (*friend_friend.BlockFriendResp, error) {
+	l := logic.NewBlockFriendLogic(ctx, s.svcCtx)
+	return l.BlockFriend(in)
+}

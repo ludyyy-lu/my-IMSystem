@@ -8,4 +8,5 @@ type Friend struct {
 	UserID    int64     `gorm:"index"`     // 自己
 	FriendID  int64     `gorm:"index"`     // 好友
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }

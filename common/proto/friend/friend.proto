@@ -73,6 +73,16 @@ message GetFriendsResponse {
   repeated FriendInfo friends = 1;
 }
 
+message BlockFriendReq {
+  int64 user_id = 1;
+  int64 target_id = 2;
+}
+
+message BlockFriendResp {
+  string msg = 1;
+}
+
+
 // 定义服务接口
 service Friend {
   rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse);
@@ -80,4 +90,5 @@ service Friend {
   rpc RespondFriendRequest(RespondFriendRequestRequest) returns (RespondFriendRequestResponse);
   rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
   rpc DeleteFriend(DeleteFriendRequest) returns (DeleteFriendResponse);
+  rpc BlockFriend(BlockFriendReq) returns (BlockFriendResp);
 }

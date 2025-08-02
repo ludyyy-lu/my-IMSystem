@@ -18,6 +18,7 @@ type (
 		RespondFriendRequest(ctx context.Context, in *RespondFriendRequestRequest, opts ...grpc.CallOption) (*RespondFriendRequestResponse, error)
 		GetFriends(ctx context.Context, in *GetFriendsRequest, opts ...grpc.CallOption) (*GetFriendsResponse, error)
 		DeleteFriend(ctx context.Context, in *DeleteFriendRequest, opts ...grpc.CallOption) (*DeleteFriendResponse, error)
+		BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error)
 	}
 
 	defaultFriend struct {
@@ -54,4 +55,9 @@ func (m *defaultFriend) GetFriends(ctx context.Context, in *GetFriendsRequest, o
 func (m *defaultFriend) DeleteFriend(ctx context.Context, in *DeleteFriendRequest, opts ...grpc.CallOption) (*DeleteFriendResponse, error) {
 	client := NewFriendClient(m.cli.Conn())
 	return client.DeleteFriend(ctx, in, opts...)
+}
+
+func (m *defaultFriend) BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error) {
+	client := NewFriendClient(m.cli.Conn())
+	return client.BlockFriend(ctx, in, opts...)
 }
