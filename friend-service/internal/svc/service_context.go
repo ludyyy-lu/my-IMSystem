@@ -25,7 +25,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err != nil {
 		log.Fatalf("auto migration failed: %v", err)
 	}
-	kafka.InitKafkaWriter(c.Kafka.Brokers, c.Kafka.Topic)
+	kafka.InitKafkaProducer(
+		[]string{"kafka:9092"},
+	)
 	return &ServiceContext{
 		Config: c,
 		DB:     db,

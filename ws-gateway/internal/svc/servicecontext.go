@@ -4,7 +4,8 @@ import (
 	"my-IMSystem/chat-service/chat"
 	"my-IMSystem/ws-gateway/internal/config"
 	"my-IMSystem/ws-gateway/internal/conn"
-	"my-IMSystem/ws-gateway/internal/kafka"
+	//"my-IMSystem/ws-gateway/internal/kafka"
+	"my-IMSystem/common/kafka"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -26,7 +27,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	})
 	kafka.InitKafkaProducer(
 		[]string{"kafka:9092"},
-		"im-chat-topic",
 	)
 	return &ServiceContext{
 		Config:       c,

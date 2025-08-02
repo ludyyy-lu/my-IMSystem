@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"my-IMSystem/chat-service/chat"
-	"my-IMSystem/ws-gateway/internal/kafka"
+	//"my-IMSystem/ws-gateway/internal/kafka"
+	"my-IMSystem/common/kafka"
 	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/svc"
 
@@ -97,7 +98,7 @@ func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.M
 	msg.From = fromUserId
 
 	// ✅ 发送到 Kafka（即便用户在线，也不在这里推送）
-	err := kafka.SendMessage(msg)
+	err := kafka.SendMessage(svcCtx.Config.Kafka.Topic,msg)
 	if err != nil {
 		log.Printf("Failed to send message to Kafka: %v", err)
 	}

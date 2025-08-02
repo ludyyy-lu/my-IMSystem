@@ -10,5 +10,5 @@ Mysql:
 
 Kafka:
   Brokers:
-    - localhost:9092
-  Topic: friend-events
+    - kafka:9092
+  Topic: im-friend-topic # 好友相关事件（添加好友、删除好友等）

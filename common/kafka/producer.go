@@ -2,6 +2,8 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"log"
 
 	"github.com/segmentio/kafka-go"
@@ -9,22 +11,29 @@ import (
 
 var kafkaWriter *kafka.Writer
 
-func InitKafkaWriter(brokers []string, topic string) {
+func InitKafkaProducer(brokers []string) {
 	kafkaWriter = &kafka.Writer{
 		Addr:     kafka.TCP(brokers...),
-		Topic:    topic,
 		Balancer: &kafka.LeastBytes{},
+		Async:    true,
 	}
 }
 
-func SendMessage(topic string, data []byte) error {
+func SendMessage(topic string, value any) error {
 	if kafkaWriter == nil {
 		log.Println("Kafka writer is not initialized")
-		return nil
+		return errors.New("kafka writer not initialized")
 	}
+
+	// 序列化 value
+	msgBytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
 	msg := kafka.Message{
 		Topic: topic,
-		Value: data,
+		Value: msgBytes,
 	}
 	return kafkaWriter.WriteMessages(context.Background(), msg)
 }
