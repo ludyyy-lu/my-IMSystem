@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"my-IMSystem/friend-service/friend"
+	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/logic"
 	"my-IMSystem/friend-service/internal/svc"
 )
