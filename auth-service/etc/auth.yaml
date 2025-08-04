@@ -4,3 +4,7 @@ Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: auth.rpc
+
+JwtAuth:
+  AccessSecret: my-secret-key
+  AccessExpire: 604800  # 7 天秒数
