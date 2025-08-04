@@ -1,0 +1,87 @@
+syntax = "proto3";
+package auth;
+option go_package = "./auth;auth";
+// 注册
+message RegisterReq {
+  string username = 1;
+  string password = 2;
+}
+message RegisterResp {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+}
+// 登录
+message LoginReq {
+  string username = 1;
+  string password = 2;
+  string device_id = 3; // 用于多端登录识别（可选）
+}
+message LoginResp {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+}
+// 验证 token
+message VerifyTokenReq {
+  string access_token = 1;
+}
+message VerifyTokenResp {
+  bool valid = 1;
+  int64 user_id = 2;
+  string device_id = 3;
+}
+// 解析 token
+message ParseTokenReq {
+  string access_token = 1;
+}
+message ParseTokenResp {
+  int64 user_id = 1;
+  string device_id = 2;
+  int64 expires_at = 3;
+}
+// 刷新 token
+message RefreshTokenReq {
+  string refresh_token = 1;
+}
+message RefreshTokenResp {
+  string access_token = 1;
+  int64 expires_at = 2;
+}
+// 多设备会话
+message ListSessionsReq {
+  int64 user_id = 1;
+}
+message ListSessionsResp {
+  repeated Session sessions = 1;
+}
+message Session {
+  string device_id = 1;
+  int64 login_at = 2;
+  int64 expires_at = 3;
+}
+// 注销会话
+message LogoutSessionReq {
+  int64 user_id = 1;
+  string device_id = 2;
+}
+message LogoutSessionResp {
+  string message = 1;
+}
+
+service Auth {
+  // 用户注册：注册账号密码，返回 token
+  rpc Register(RegisterReq) returns (RegisterResp);
+  // 用户登录：验证账号密码，返回 token
+  rpc Login(LoginReq) returns (LoginResp);
+  // 校验 token 是否有效
+  rpc VerifyToken(VerifyTokenReq) returns (VerifyTokenResp);
+  // 解析 token，提取 userId（如 userId, deviceId）
+  rpc ParseToken(ParseTokenReq) returns (ParseTokenResp);
+  // 刷新 token（用于保持会话）
+  rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenResp);
+  // 多设备：列出当前用户的所有活跃会话
+  rpc ListSessions(ListSessionsReq) returns (ListSessionsResp);
+  // 多设备：注销某个设备的 token（退出登录）
+  rpc LogoutSession(LogoutSessionReq) returns (LogoutSessionResp);
+}
