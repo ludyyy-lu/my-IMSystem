@@ -27,6 +27,8 @@ type (
 		ListSessions(ctx context.Context, in *ListSessionsReq, opts ...grpc.CallOption) (*ListSessionsResp, error)
 		// 多设备：注销某个设备的 token（退出登录）
 		LogoutSession(ctx context.Context, in *LogoutSessionReq, opts ...grpc.CallOption) (*LogoutSessionResp, error)
+		// 生成 token（用于其他服务调用）
+		GenerateToken(ctx context.Context, in *GenerateTokenReq, opts ...grpc.CallOption) (*GenerateTokenResp, error)
 	}
 
 	defaultAuth struct {
@@ -80,4 +82,10 @@ func (m *defaultAuth) ListSessions(ctx context.Context, in *ListSessionsReq, opt
 func (m *defaultAuth) LogoutSession(ctx context.Context, in *LogoutSessionReq, opts ...grpc.CallOption) (*LogoutSessionResp, error) {
 	client := NewAuthClient(m.cli.Conn())
 	return client.LogoutSession(ctx, in, opts...)
+}
+
+// 生成 token（用于其他服务调用）
+func (m *defaultAuth) GenerateToken(ctx context.Context, in *GenerateTokenReq, opts ...grpc.CallOption) (*GenerateTokenResp, error) {
+	client := NewAuthClient(m.cli.Conn())
+	return client.GenerateToken(ctx, in, opts...)
 }

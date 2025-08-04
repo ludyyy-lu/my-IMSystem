@@ -808,6 +808,103 @@ func (x *LogoutSessionResp) GetMessage() string {
 	return ""
 }
 
+// 生成 token（用于其他服务调用）
+type GenerateTokenReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateTokenReq) Reset() {
+	*x = GenerateTokenReq{}
+	mi := &file_common_proto_auth_auth_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateTokenReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateTokenReq) ProtoMessage() {}
+
+func (x *GenerateTokenReq) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_auth_auth_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateTokenReq.ProtoReflect.Descriptor instead.
+func (*GenerateTokenReq) Descriptor() ([]byte, []int) {
+	return file_common_proto_auth_auth_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GenerateTokenReq) GetUid() int64 {
+	if x != nil {
+		return x.Uid
+	}
+	return 0
+}
+
+type GenerateTokenResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ExpiredAt     int64                  `protobuf:"varint,2,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateTokenResp) Reset() {
+	*x = GenerateTokenResp{}
+	mi := &file_common_proto_auth_auth_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateTokenResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateTokenResp) ProtoMessage() {}
+
+func (x *GenerateTokenResp) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_auth_auth_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateTokenResp.ProtoReflect.Descriptor instead.
+func (*GenerateTokenResp) Descriptor() ([]byte, []int) {
+	return file_common_proto_auth_auth_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GenerateTokenResp) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *GenerateTokenResp) GetExpiredAt() int64 {
+	if x != nil {
+		return x.ExpiredAt
+	}
+	return 0
+}
+
 var File_common_proto_auth_auth_proto protoreflect.FileDescriptor
 
 const file_common_proto_auth_auth_proto_rawDesc = "" +
@@ -862,7 +959,13 @@ const file_common_proto_auth_auth_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
 	"\tdevice_id\x18\x02 \x01(\tR\bdeviceId\"-\n" +
 	"\x11LogoutSessionResp\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\x98\x03\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"$\n" +
+	"\x10GenerateTokenReq\x12\x10\n" +
+	"\x03uid\x18\x01 \x01(\x03R\x03uid\"H\n" +
+	"\x11GenerateTokenResp\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1d\n" +
+	"\n" +
+	"expired_at\x18\x02 \x01(\x03R\texpiredAt2\xda\x03\n" +
 	"\x04Auth\x121\n" +
 	"\bRegister\x12\x11.auth.RegisterReq\x1a\x12.auth.RegisterResp\x12(\n" +
 	"\x05Login\x12\x0e.auth.LoginReq\x1a\x0f.auth.LoginResp\x12:\n" +
@@ -871,7 +974,8 @@ const file_common_proto_auth_auth_proto_rawDesc = "" +
 	"ParseToken\x12\x13.auth.ParseTokenReq\x1a\x14.auth.ParseTokenResp\x12=\n" +
 	"\fRefreshToken\x12\x15.auth.RefreshTokenReq\x1a\x16.auth.RefreshTokenResp\x12=\n" +
 	"\fListSessions\x12\x15.auth.ListSessionsReq\x1a\x16.auth.ListSessionsResp\x12@\n" +
-	"\rLogoutSession\x12\x16.auth.LogoutSessionReq\x1a\x17.auth.LogoutSessionRespB\rZ\v./auth;authb\x06proto3"
+	"\rLogoutSession\x12\x16.auth.LogoutSessionReq\x1a\x17.auth.LogoutSessionResp\x12@\n" +
+	"\rGenerateToken\x12\x16.auth.GenerateTokenReq\x1a\x17.auth.GenerateTokenRespB\rZ\v./auth;authb\x06proto3"
 
 var (
 	file_common_proto_auth_auth_proto_rawDescOnce sync.Once
@@ -885,7 +989,7 @@ func file_common_proto_auth_auth_proto_rawDescGZIP() []byte {
 	return file_common_proto_auth_auth_proto_rawDescData
 }
 
-var file_common_proto_auth_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_common_proto_auth_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_common_proto_auth_auth_proto_goTypes = []any{
 	(*RegisterReq)(nil),       // 0: auth.RegisterReq
 	(*RegisterResp)(nil),      // 1: auth.RegisterResp
@@ -902,6 +1006,8 @@ var file_common_proto_auth_auth_proto_goTypes = []any{
 	(*Session)(nil),           // 12: auth.Session
 	(*LogoutSessionReq)(nil),  // 13: auth.LogoutSessionReq
 	(*LogoutSessionResp)(nil), // 14: auth.LogoutSessionResp
+	(*GenerateTokenReq)(nil),  // 15: auth.GenerateTokenReq
+	(*GenerateTokenResp)(nil), // 16: auth.GenerateTokenResp
 }
 var file_common_proto_auth_auth_proto_depIdxs = []int32{
 	12, // 0: auth.ListSessionsResp.sessions:type_name -> auth.Session
@@ -912,15 +1018,17 @@ var file_common_proto_auth_auth_proto_depIdxs = []int32{
 	8,  // 5: auth.Auth.RefreshToken:input_type -> auth.RefreshTokenReq
 	10, // 6: auth.Auth.ListSessions:input_type -> auth.ListSessionsReq
 	13, // 7: auth.Auth.LogoutSession:input_type -> auth.LogoutSessionReq
-	1,  // 8: auth.Auth.Register:output_type -> auth.RegisterResp
-	3,  // 9: auth.Auth.Login:output_type -> auth.LoginResp
-	5,  // 10: auth.Auth.VerifyToken:output_type -> auth.VerifyTokenResp
-	7,  // 11: auth.Auth.ParseToken:output_type -> auth.ParseTokenResp
-	9,  // 12: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResp
-	11, // 13: auth.Auth.ListSessions:output_type -> auth.ListSessionsResp
-	14, // 14: auth.Auth.LogoutSession:output_type -> auth.LogoutSessionResp
-	8,  // [8:15] is the sub-list for method output_type
-	1,  // [1:8] is the sub-list for method input_type
+	15, // 8: auth.Auth.GenerateToken:input_type -> auth.GenerateTokenReq
+	1,  // 9: auth.Auth.Register:output_type -> auth.RegisterResp
+	3,  // 10: auth.Auth.Login:output_type -> auth.LoginResp
+	5,  // 11: auth.Auth.VerifyToken:output_type -> auth.VerifyTokenResp
+	7,  // 12: auth.Auth.ParseToken:output_type -> auth.ParseTokenResp
+	9,  // 13: auth.Auth.RefreshToken:output_type -> auth.RefreshTokenResp
+	11, // 14: auth.Auth.ListSessions:output_type -> auth.ListSessionsResp
+	14, // 15: auth.Auth.LogoutSession:output_type -> auth.LogoutSessionResp
+	16, // 16: auth.Auth.GenerateToken:output_type -> auth.GenerateTokenResp
+	9,  // [9:17] is the sub-list for method output_type
+	1,  // [1:9] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
 	1,  // [1:1] is the sub-list for extension extendee
 	0,  // [0:1] is the sub-list for field type_name
@@ -937,7 +1045,7 @@ func file_common_proto_auth_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_auth_auth_proto_rawDesc), len(file_common_proto_auth_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

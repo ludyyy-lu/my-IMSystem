@@ -64,3 +64,9 @@ func (s *AuthServer) LogoutSession(ctx context.Context, in *auth_auth.LogoutSess
 	l := logic.NewLogoutSessionLogic(ctx, s.svcCtx)
 	return l.LogoutSession(in)
 }
+
+// 生成 token（用于其他服务调用）
+func (s *AuthServer) GenerateToken(ctx context.Context, in *auth_auth.GenerateTokenReq) (*auth_auth.GenerateTokenResp, error) {
+	l := logic.NewGenerateTokenLogic(ctx, s.svcCtx)
+	return l.GenerateToken(in)
+}

@@ -68,6 +68,14 @@ message LogoutSessionReq {
 message LogoutSessionResp {
   string message = 1;
 }
+// 生成 token（用于其他服务调用）
+message GenerateTokenReq {
+  int64 uid = 1;
+}
+message GenerateTokenResp {
+  string token = 1;
+  int64 expired_at = 2;
+}
 
 service Auth {
   // 用户注册：注册账号密码，返回 token
@@ -84,4 +92,6 @@ service Auth {
   rpc ListSessions(ListSessionsReq) returns (ListSessionsResp);
   // 多设备：注销某个设备的 token（退出登录）
   rpc LogoutSession(LogoutSessionReq) returns (LogoutSessionResp);
+  // 生成 token（用于其他服务调用）
+  rpc GenerateToken (GenerateTokenReq) returns (GenerateTokenResp);
 }

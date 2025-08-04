@@ -26,6 +26,7 @@ const (
 	Auth_RefreshToken_FullMethodName  = "/auth.Auth/RefreshToken"
 	Auth_ListSessions_FullMethodName  = "/auth.Auth/ListSessions"
 	Auth_LogoutSession_FullMethodName = "/auth.Auth/LogoutSession"
+	Auth_GenerateToken_FullMethodName = "/auth.Auth/GenerateToken"
 )
 
 // AuthClient is the client API for Auth service.
@@ -46,6 +47,8 @@ type AuthClient interface {
 	ListSessions(ctx context.Context, in *ListSessionsReq, opts ...grpc.CallOption) (*ListSessionsResp, error)
 	// 多设备：注销某个设备的 token（退出登录）
 	LogoutSession(ctx context.Context, in *LogoutSessionReq, opts ...grpc.CallOption) (*LogoutSessionResp, error)
+	// 生成 token（用于其他服务调用）
+	GenerateToken(ctx context.Context, in *GenerateTokenReq, opts ...grpc.CallOption) (*GenerateTokenResp, error)
 }
 
 type authClient struct {
@@ -126,6 +129,16 @@ func (c *authClient) LogoutSession(ctx context.Context, in *LogoutSessionReq, op
 	return out, nil
 }
 
+func (c *authClient) GenerateToken(ctx context.Context, in *GenerateTokenReq, opts ...grpc.CallOption) (*GenerateTokenResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateTokenResp)
+	err := c.cc.Invoke(ctx, Auth_GenerateToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
@@ -144,6 +157,8 @@ type AuthServer interface {
 	ListSessions(context.Context, *ListSessionsReq) (*ListSessionsResp, error)
 	// 多设备：注销某个设备的 token（退出登录）
 	LogoutSession(context.Context, *LogoutSessionReq) (*LogoutSessionResp, error)
+	// 生成 token（用于其他服务调用）
+	GenerateToken(context.Context, *GenerateTokenReq) (*GenerateTokenResp, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -174,6 +189,9 @@ func (UnimplementedAuthServer) ListSessions(context.Context, *ListSessionsReq) (
 }
 func (UnimplementedAuthServer) LogoutSession(context.Context, *LogoutSessionReq) (*LogoutSessionResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogoutSession not implemented")
+}
+func (UnimplementedAuthServer) GenerateToken(context.Context, *GenerateTokenReq) (*GenerateTokenResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateToken not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -322,6 +340,24 @@ func _Auth_LogoutSession_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_GenerateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateTokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).GenerateToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_GenerateToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).GenerateToken(ctx, req.(*GenerateTokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -356,6 +392,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LogoutSession",
 			Handler:    _Auth_LogoutSession_Handler,
+		},
+		{
+			MethodName: "GenerateToken",
+			Handler:    _Auth_GenerateToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
