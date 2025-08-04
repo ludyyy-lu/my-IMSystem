@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("my-secret-key") // 可放入 config 管理
+// var jwtKey = []byte("my-secret-key") // 可放入 config 管理
 
 type Claims struct {
 	Uid int64 `json:"uid"`
@@ -14,7 +14,7 @@ type Claims struct {
 }
 
 // 生成 JWT token
-func GenerateToken(uid int64) (string, error) {
+func GenerateToken(uid int64, secretKey []byte) (string, error) {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &Claims{
 		Uid: uid,
@@ -23,14 +23,14 @@ func GenerateToken(uid int64) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtKey)
+	return token.SignedString(secretKey)
 }
 
 // 解析 token
-func ParseToken(tokenString string) (*Claims, error) {
+func ParseToken(tokenString string, secretKey []byte) (*Claims, error) {
 	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
+		return secretKey, nil
 	})
 	if err != nil || !token.Valid {
 		return nil, err
