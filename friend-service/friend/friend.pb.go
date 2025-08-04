@@ -958,6 +958,103 @@ func (x *GetBlockedListResp) GetBlockedIds() []int64 {
 	return nil
 }
 
+// 判断是否被拉黑请求和响应
+type IsBlockedReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SenderId      int64                  `protobuf:"varint,1,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"` // 谁想加我 or 给我发消息
+	TargetId      int64                  `protobuf:"varint,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"` // 我是谁
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsBlockedReq) Reset() {
+	*x = IsBlockedReq{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsBlockedReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsBlockedReq) ProtoMessage() {}
+
+func (x *IsBlockedReq) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsBlockedReq.ProtoReflect.Descriptor instead.
+func (*IsBlockedReq) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *IsBlockedReq) GetSenderId() int64 {
+	if x != nil {
+		return x.SenderId
+	}
+	return 0
+}
+
+func (x *IsBlockedReq) GetTargetId() int64 {
+	if x != nil {
+		return x.TargetId
+	}
+	return 0
+}
+
+type IsBlockedResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsBlocked     bool                   `protobuf:"varint,1,opt,name=is_blocked,json=isBlocked,proto3" json:"is_blocked,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsBlockedResp) Reset() {
+	*x = IsBlockedResp{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsBlockedResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsBlockedResp) ProtoMessage() {}
+
+func (x *IsBlockedResp) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsBlockedResp.ProtoReflect.Descriptor instead.
+func (*IsBlockedResp) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *IsBlockedResp) GetIsBlocked() bool {
+	if x != nil {
+		return x.IsBlocked
+	}
+	return false
+}
+
 var File_common_proto_friend_friend_proto protoreflect.FileDescriptor
 
 const file_common_proto_friend_friend_proto_rawDesc = "" +
@@ -1016,11 +1113,17 @@ const file_common_proto_friend_friend_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\"5\n" +
 	"\x12GetBlockedListResp\x12\x1f\n" +
 	"\vblocked_ids\x18\x01 \x03(\x03R\n" +
-	"blockedIds*8\n" +
+	"blockedIds\"H\n" +
+	"\fIsBlockedReq\x12\x1b\n" +
+	"\tsender_id\x18\x01 \x01(\x03R\bsenderId\x12\x1b\n" +
+	"\ttarget_id\x18\x02 \x01(\x03R\btargetId\".\n" +
+	"\rIsBlockedResp\x12\x1d\n" +
+	"\n" +
+	"is_blocked\x18\x01 \x01(\bR\tisBlocked*8\n" +
 	"\rRequestStatus\x12\v\n" +
 	"\aPENDING\x10\x00\x12\f\n" +
 	"\bACCEPTED\x10\x01\x12\f\n" +
-	"\bREJECTED\x10\x022\xfe\x04\n" +
+	"\bREJECTED\x10\x022\xb8\x05\n" +
 	"\x06Friend\x12X\n" +
 	"\x11SendFriendRequest\x12 .friend.SendFriendRequestRequest\x1a!.friend.SendFriendRequestResponse\x12X\n" +
 	"\x11GetFriendRequests\x12 .friend.GetFriendRequestsRequest\x1a!.friend.GetFriendRequestsResponse\x12a\n" +
@@ -1030,7 +1133,8 @@ const file_common_proto_friend_friend_proto_rawDesc = "" +
 	"\fDeleteFriend\x12\x1b.friend.DeleteFriendRequest\x1a\x1c.friend.DeleteFriendResponse\x12>\n" +
 	"\vBlockFriend\x12\x16.friend.BlockFriendReq\x1a\x17.friend.BlockFriendResp\x12D\n" +
 	"\rUnblockFriend\x12\x18.friend.UnblockFriendReq\x1a\x19.friend.UnblockFriendResp\x12G\n" +
-	"\x0eGetBlockedList\x12\x19.friend.GetBlockedListReq\x1a\x1a.friend.GetBlockedListRespB\x11Z\x0f./friend;friendb\x06proto3"
+	"\x0eGetBlockedList\x12\x19.friend.GetBlockedListReq\x1a\x1a.friend.GetBlockedListResp\x128\n" +
+	"\tIsBlocked\x12\x14.friend.IsBlockedReq\x1a\x15.friend.IsBlockedRespB\x11Z\x0f./friend;friendb\x06proto3"
 
 var (
 	file_common_proto_friend_friend_proto_rawDescOnce sync.Once
@@ -1045,7 +1149,7 @@ func file_common_proto_friend_friend_proto_rawDescGZIP() []byte {
 }
 
 var file_common_proto_friend_friend_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_common_proto_friend_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_common_proto_friend_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_common_proto_friend_friend_proto_goTypes = []any{
 	(RequestStatus)(0),                   // 0: friend.RequestStatus
 	(*SendFriendRequestRequest)(nil),     // 1: friend.SendFriendRequestRequest
@@ -1066,6 +1170,8 @@ var file_common_proto_friend_friend_proto_goTypes = []any{
 	(*UnblockFriendResp)(nil),            // 16: friend.UnblockFriendResp
 	(*GetBlockedListReq)(nil),            // 17: friend.GetBlockedListReq
 	(*GetBlockedListResp)(nil),           // 18: friend.GetBlockedListResp
+	(*IsBlockedReq)(nil),                 // 19: friend.IsBlockedReq
+	(*IsBlockedResp)(nil),                // 20: friend.IsBlockedResp
 }
 var file_common_proto_friend_friend_proto_depIdxs = []int32{
 	4,  // 0: friend.GetFriendRequestsResponse.requests:type_name -> friend.FriendRequest
@@ -1078,16 +1184,18 @@ var file_common_proto_friend_friend_proto_depIdxs = []int32{
 	13, // 7: friend.Friend.BlockFriend:input_type -> friend.BlockFriendReq
 	15, // 8: friend.Friend.UnblockFriend:input_type -> friend.UnblockFriendReq
 	17, // 9: friend.Friend.GetBlockedList:input_type -> friend.GetBlockedListReq
-	2,  // 10: friend.Friend.SendFriendRequest:output_type -> friend.SendFriendRequestResponse
-	5,  // 11: friend.Friend.GetFriendRequests:output_type -> friend.GetFriendRequestsResponse
-	7,  // 12: friend.Friend.RespondFriendRequest:output_type -> friend.RespondFriendRequestResponse
-	12, // 13: friend.Friend.GetFriends:output_type -> friend.GetFriendsResponse
-	9,  // 14: friend.Friend.DeleteFriend:output_type -> friend.DeleteFriendResponse
-	14, // 15: friend.Friend.BlockFriend:output_type -> friend.BlockFriendResp
-	16, // 16: friend.Friend.UnblockFriend:output_type -> friend.UnblockFriendResp
-	18, // 17: friend.Friend.GetBlockedList:output_type -> friend.GetBlockedListResp
-	10, // [10:18] is the sub-list for method output_type
-	2,  // [2:10] is the sub-list for method input_type
+	19, // 10: friend.Friend.IsBlocked:input_type -> friend.IsBlockedReq
+	2,  // 11: friend.Friend.SendFriendRequest:output_type -> friend.SendFriendRequestResponse
+	5,  // 12: friend.Friend.GetFriendRequests:output_type -> friend.GetFriendRequestsResponse
+	7,  // 13: friend.Friend.RespondFriendRequest:output_type -> friend.RespondFriendRequestResponse
+	12, // 14: friend.Friend.GetFriends:output_type -> friend.GetFriendsResponse
+	9,  // 15: friend.Friend.DeleteFriend:output_type -> friend.DeleteFriendResponse
+	14, // 16: friend.Friend.BlockFriend:output_type -> friend.BlockFriendResp
+	16, // 17: friend.Friend.UnblockFriend:output_type -> friend.UnblockFriendResp
+	18, // 18: friend.Friend.GetBlockedList:output_type -> friend.GetBlockedListResp
+	20, // 19: friend.Friend.IsBlocked:output_type -> friend.IsBlockedResp
+	11, // [11:20] is the sub-list for method output_type
+	2,  // [2:11] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -1104,7 +1212,7 @@ func file_common_proto_friend_friend_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_friend_friend_proto_rawDesc), len(file_common_proto_friend_friend_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   18,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -21,6 +21,7 @@ type (
 		BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error)
 		UnblockFriend(ctx context.Context, in *UnblockFriendReq, opts ...grpc.CallOption) (*UnblockFriendResp, error)
 		GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error)
+		IsBlocked(ctx context.Context, in *IsBlockedReq, opts ...grpc.CallOption) (*IsBlockedResp, error)
 	}
 
 	defaultFriend struct {
@@ -72,4 +73,9 @@ func (m *defaultFriend) UnblockFriend(ctx context.Context, in *UnblockFriendReq,
 func (m *defaultFriend) GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error) {
 	client := NewFriendClient(m.cli.Conn())
 	return client.GetBlockedList(ctx, in, opts...)
+}
+
+func (m *defaultFriend) IsBlocked(ctx context.Context, in *IsBlockedReq, opts ...grpc.CallOption) (*IsBlockedResp, error) {
+	client := NewFriendClient(m.cli.Conn())
+	return client.IsBlocked(ctx, in, opts...)
 }

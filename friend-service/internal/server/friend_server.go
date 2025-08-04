@@ -62,3 +62,8 @@ func (s *FriendServer) GetBlockedList(ctx context.Context, in *friend_friend.Get
 	l := logic.NewGetBlockedListLogic(ctx, s.svcCtx)
 	return l.GetBlockedList(in)
 }
+
+func (s *FriendServer) IsBlocked(ctx context.Context, in *friend_friend.IsBlockedReq) (*friend_friend.IsBlockedResp, error) {
+	l := logic.NewIsBlockedLogic(ctx, s.svcCtx)
+	return l.IsBlocked(in)
+}

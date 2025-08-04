@@ -100,6 +100,16 @@ message GetBlockedListReq {
 message GetBlockedListResp {
   repeated int64 blocked_ids = 1;
 }
+
+// 判断是否被拉黑请求和响应
+message IsBlockedReq {
+  int64 sender_id = 1; // 谁想加我 or 给我发消息
+  int64 target_id = 2; // 我是谁
+}
+
+message IsBlockedResp {
+  bool is_blocked = 1;
+}
 // 定义服务接口
 service Friend {
   rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse);
@@ -110,4 +120,5 @@ service Friend {
   rpc BlockFriend(BlockFriendReq) returns (BlockFriendResp);
   rpc UnblockFriend(UnblockFriendReq) returns (UnblockFriendResp);
   rpc GetBlockedList(GetBlockedListReq) returns (GetBlockedListResp);
+  rpc IsBlocked(IsBlockedReq) returns (IsBlockedResp);
 }
