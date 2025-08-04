@@ -6,7 +6,9 @@ import (
 	"my-IMSystem/chat-service/internal/handler"
 	"my-IMSystem/chat-service/internal/kafka"
 	"my-IMSystem/chat-service/internal/model"
+	"my-IMSystem/friend-service/friend"
 
+	"github.com/zeromicro/go-zero/zrpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -15,10 +17,11 @@ import (
 // 把全局需要共享的资源（DB、Redis、Kafka 等）集中在一起初始化，然后传递给每一个业务逻辑 handler 使用
 
 type ServiceContext struct {
-	Config   config.Config
-	Producer *kafka.KafkaProducer
-	DB       *gorm.DB
-	MessageModel model.MessageModel 
+	Config       config.Config
+	Producer     *kafka.KafkaProducer
+	DB           *gorm.DB
+	MessageModel model.MessageModel
+	FriendRpc    friend.Friend
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -45,7 +48,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			c.Kafka.Brokers,
 			c.Kafka.Topic,
 		),
-		DB: db,
-		MessageModel: model.NewMessageModel(db), 
+		DB:           db,
+		MessageModel: model.NewMessageModel(db),
+		FriendRpc:    friend.NewFriend(zrpc.MustNewClient(c.FriendRpc)),
 	}
 }

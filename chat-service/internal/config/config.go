@@ -12,4 +12,5 @@ type Config struct {
         Topic   string
         Group   string
     }
+	FriendRpc zrpc.RpcClientConf
 }
