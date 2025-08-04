@@ -25,6 +25,8 @@ const (
 	Friend_GetFriends_FullMethodName           = "/friend.Friend/GetFriends"
 	Friend_DeleteFriend_FullMethodName         = "/friend.Friend/DeleteFriend"
 	Friend_BlockFriend_FullMethodName          = "/friend.Friend/BlockFriend"
+	Friend_UnblockFriend_FullMethodName        = "/friend.Friend/UnblockFriend"
+	Friend_GetBlockedList_FullMethodName       = "/friend.Friend/GetBlockedList"
 )
 
 // FriendClient is the client API for Friend service.
@@ -39,6 +41,8 @@ type FriendClient interface {
 	GetFriends(ctx context.Context, in *GetFriendsRequest, opts ...grpc.CallOption) (*GetFriendsResponse, error)
 	DeleteFriend(ctx context.Context, in *DeleteFriendRequest, opts ...grpc.CallOption) (*DeleteFriendResponse, error)
 	BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error)
+	UnblockFriend(ctx context.Context, in *UnblockFriendReq, opts ...grpc.CallOption) (*UnblockFriendResp, error)
+	GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error)
 }
 
 type friendClient struct {
@@ -109,6 +113,26 @@ func (c *friendClient) BlockFriend(ctx context.Context, in *BlockFriendReq, opts
 	return out, nil
 }
 
+func (c *friendClient) UnblockFriend(ctx context.Context, in *UnblockFriendReq, opts ...grpc.CallOption) (*UnblockFriendResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnblockFriendResp)
+	err := c.cc.Invoke(ctx, Friend_UnblockFriend_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendClient) GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBlockedListResp)
+	err := c.cc.Invoke(ctx, Friend_GetBlockedList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FriendServer is the server API for Friend service.
 // All implementations must embed UnimplementedFriendServer
 // for forward compatibility.
@@ -121,6 +145,8 @@ type FriendServer interface {
 	GetFriends(context.Context, *GetFriendsRequest) (*GetFriendsResponse, error)
 	DeleteFriend(context.Context, *DeleteFriendRequest) (*DeleteFriendResponse, error)
 	BlockFriend(context.Context, *BlockFriendReq) (*BlockFriendResp, error)
+	UnblockFriend(context.Context, *UnblockFriendReq) (*UnblockFriendResp, error)
+	GetBlockedList(context.Context, *GetBlockedListReq) (*GetBlockedListResp, error)
 	mustEmbedUnimplementedFriendServer()
 }
 
@@ -148,6 +174,12 @@ func (UnimplementedFriendServer) DeleteFriend(context.Context, *DeleteFriendRequ
 }
 func (UnimplementedFriendServer) BlockFriend(context.Context, *BlockFriendReq) (*BlockFriendResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BlockFriend not implemented")
+}
+func (UnimplementedFriendServer) UnblockFriend(context.Context, *UnblockFriendReq) (*UnblockFriendResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnblockFriend not implemented")
+}
+func (UnimplementedFriendServer) GetBlockedList(context.Context, *GetBlockedListReq) (*GetBlockedListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlockedList not implemented")
 }
 func (UnimplementedFriendServer) mustEmbedUnimplementedFriendServer() {}
 func (UnimplementedFriendServer) testEmbeddedByValue()                {}
@@ -278,6 +310,42 @@ func _Friend_BlockFriend_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Friend_UnblockFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnblockFriendReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).UnblockFriend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Friend_UnblockFriend_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).UnblockFriend(ctx, req.(*UnblockFriendReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Friend_GetBlockedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlockedListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).GetBlockedList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Friend_GetBlockedList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).GetBlockedList(ctx, req.(*GetBlockedListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Friend_ServiceDesc is the grpc.ServiceDesc for Friend service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -308,6 +376,14 @@ var Friend_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BlockFriend",
 			Handler:    _Friend_BlockFriend_Handler,
+		},
+		{
+			MethodName: "UnblockFriend",
+			Handler:    _Friend_UnblockFriend_Handler,
+		},
+		{
+			MethodName: "GetBlockedList",
+			Handler:    _Friend_GetBlockedList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

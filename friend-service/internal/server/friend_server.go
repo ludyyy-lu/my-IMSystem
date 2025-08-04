@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	friend_friend "my-IMSystem/friend-service/friend"
+	"my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/logic"
 	"my-IMSystem/friend-service/internal/svc"
 )
@@ -51,4 +51,14 @@ func (s *FriendServer) DeleteFriend(ctx context.Context, in *friend_friend.Delet
 func (s *FriendServer) BlockFriend(ctx context.Context, in *friend_friend.BlockFriendReq) (*friend_friend.BlockFriendResp, error) {
 	l := logic.NewBlockFriendLogic(ctx, s.svcCtx)
 	return l.BlockFriend(in)
+}
+
+func (s *FriendServer) UnblockFriend(ctx context.Context, in *friend_friend.UnblockFriendReq) (*friend_friend.UnblockFriendResp, error) {
+	l := logic.NewUnblockFriendLogic(ctx, s.svcCtx)
+	return l.UnblockFriend(in)
+}
+
+func (s *FriendServer) GetBlockedList(ctx context.Context, in *friend_friend.GetBlockedListReq) (*friend_friend.GetBlockedListResp, error) {
+	l := logic.NewGetBlockedListLogic(ctx, s.svcCtx)
+	return l.GetBlockedList(in)
 }

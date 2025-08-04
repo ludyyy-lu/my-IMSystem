@@ -772,6 +772,192 @@ func (x *BlockFriendResp) GetMsg() string {
 	return ""
 }
 
+// 取消拉黑
+type UnblockFriendReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	TargetId      int64                  `protobuf:"varint,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnblockFriendReq) Reset() {
+	*x = UnblockFriendReq{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnblockFriendReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnblockFriendReq) ProtoMessage() {}
+
+func (x *UnblockFriendReq) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnblockFriendReq.ProtoReflect.Descriptor instead.
+func (*UnblockFriendReq) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UnblockFriendReq) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UnblockFriendReq) GetTargetId() int64 {
+	if x != nil {
+		return x.TargetId
+	}
+	return 0
+}
+
+type UnblockFriendResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Msg           string                 `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnblockFriendResp) Reset() {
+	*x = UnblockFriendResp{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnblockFriendResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnblockFriendResp) ProtoMessage() {}
+
+func (x *UnblockFriendResp) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnblockFriendResp.ProtoReflect.Descriptor instead.
+func (*UnblockFriendResp) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *UnblockFriendResp) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+// 获取拉黑列表请求和响应
+type GetBlockedListReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBlockedListReq) Reset() {
+	*x = GetBlockedListReq{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBlockedListReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBlockedListReq) ProtoMessage() {}
+
+func (x *GetBlockedListReq) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBlockedListReq.ProtoReflect.Descriptor instead.
+func (*GetBlockedListReq) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetBlockedListReq) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetBlockedListResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BlockedIds    []int64                `protobuf:"varint,1,rep,packed,name=blocked_ids,json=blockedIds,proto3" json:"blocked_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBlockedListResp) Reset() {
+	*x = GetBlockedListResp{}
+	mi := &file_common_proto_friend_friend_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBlockedListResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBlockedListResp) ProtoMessage() {}
+
+func (x *GetBlockedListResp) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_friend_friend_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBlockedListResp.ProtoReflect.Descriptor instead.
+func (*GetBlockedListResp) Descriptor() ([]byte, []int) {
+	return file_common_proto_friend_friend_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetBlockedListResp) GetBlockedIds() []int64 {
+	if x != nil {
+		return x.BlockedIds
+	}
+	return nil
+}
+
 var File_common_proto_friend_friend_proto protoreflect.FileDescriptor
 
 const file_common_proto_friend_friend_proto_rawDesc = "" +
@@ -820,11 +1006,21 @@ const file_common_proto_friend_friend_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
 	"\ttarget_id\x18\x02 \x01(\x03R\btargetId\"#\n" +
 	"\x0fBlockFriendResp\x12\x10\n" +
-	"\x03msg\x18\x01 \x01(\tR\x03msg*8\n" +
+	"\x03msg\x18\x01 \x01(\tR\x03msg\"H\n" +
+	"\x10UnblockFriendReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\ttarget_id\x18\x02 \x01(\x03R\btargetId\"%\n" +
+	"\x11UnblockFriendResp\x12\x10\n" +
+	"\x03msg\x18\x01 \x01(\tR\x03msg\",\n" +
+	"\x11GetBlockedListReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"5\n" +
+	"\x12GetBlockedListResp\x12\x1f\n" +
+	"\vblocked_ids\x18\x01 \x03(\x03R\n" +
+	"blockedIds*8\n" +
 	"\rRequestStatus\x12\v\n" +
 	"\aPENDING\x10\x00\x12\f\n" +
 	"\bACCEPTED\x10\x01\x12\f\n" +
-	"\bREJECTED\x10\x022\xef\x03\n" +
+	"\bREJECTED\x10\x022\xfe\x04\n" +
 	"\x06Friend\x12X\n" +
 	"\x11SendFriendRequest\x12 .friend.SendFriendRequestRequest\x1a!.friend.SendFriendRequestResponse\x12X\n" +
 	"\x11GetFriendRequests\x12 .friend.GetFriendRequestsRequest\x1a!.friend.GetFriendRequestsResponse\x12a\n" +
@@ -832,7 +1028,9 @@ const file_common_proto_friend_friend_proto_rawDesc = "" +
 	"\n" +
 	"GetFriends\x12\x19.friend.GetFriendsRequest\x1a\x1a.friend.GetFriendsResponse\x12I\n" +
 	"\fDeleteFriend\x12\x1b.friend.DeleteFriendRequest\x1a\x1c.friend.DeleteFriendResponse\x12>\n" +
-	"\vBlockFriend\x12\x16.friend.BlockFriendReq\x1a\x17.friend.BlockFriendRespB\x11Z\x0f./friend;friendb\x06proto3"
+	"\vBlockFriend\x12\x16.friend.BlockFriendReq\x1a\x17.friend.BlockFriendResp\x12D\n" +
+	"\rUnblockFriend\x12\x18.friend.UnblockFriendReq\x1a\x19.friend.UnblockFriendResp\x12G\n" +
+	"\x0eGetBlockedList\x12\x19.friend.GetBlockedListReq\x1a\x1a.friend.GetBlockedListRespB\x11Z\x0f./friend;friendb\x06proto3"
 
 var (
 	file_common_proto_friend_friend_proto_rawDescOnce sync.Once
@@ -847,7 +1045,7 @@ func file_common_proto_friend_friend_proto_rawDescGZIP() []byte {
 }
 
 var file_common_proto_friend_friend_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_common_proto_friend_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_common_proto_friend_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_common_proto_friend_friend_proto_goTypes = []any{
 	(RequestStatus)(0),                   // 0: friend.RequestStatus
 	(*SendFriendRequestRequest)(nil),     // 1: friend.SendFriendRequestRequest
@@ -864,6 +1062,10 @@ var file_common_proto_friend_friend_proto_goTypes = []any{
 	(*GetFriendsResponse)(nil),           // 12: friend.GetFriendsResponse
 	(*BlockFriendReq)(nil),               // 13: friend.BlockFriendReq
 	(*BlockFriendResp)(nil),              // 14: friend.BlockFriendResp
+	(*UnblockFriendReq)(nil),             // 15: friend.UnblockFriendReq
+	(*UnblockFriendResp)(nil),            // 16: friend.UnblockFriendResp
+	(*GetBlockedListReq)(nil),            // 17: friend.GetBlockedListReq
+	(*GetBlockedListResp)(nil),           // 18: friend.GetBlockedListResp
 }
 var file_common_proto_friend_friend_proto_depIdxs = []int32{
 	4,  // 0: friend.GetFriendRequestsResponse.requests:type_name -> friend.FriendRequest
@@ -874,14 +1076,18 @@ var file_common_proto_friend_friend_proto_depIdxs = []int32{
 	10, // 5: friend.Friend.GetFriends:input_type -> friend.GetFriendsRequest
 	8,  // 6: friend.Friend.DeleteFriend:input_type -> friend.DeleteFriendRequest
 	13, // 7: friend.Friend.BlockFriend:input_type -> friend.BlockFriendReq
-	2,  // 8: friend.Friend.SendFriendRequest:output_type -> friend.SendFriendRequestResponse
-	5,  // 9: friend.Friend.GetFriendRequests:output_type -> friend.GetFriendRequestsResponse
-	7,  // 10: friend.Friend.RespondFriendRequest:output_type -> friend.RespondFriendRequestResponse
-	12, // 11: friend.Friend.GetFriends:output_type -> friend.GetFriendsResponse
-	9,  // 12: friend.Friend.DeleteFriend:output_type -> friend.DeleteFriendResponse
-	14, // 13: friend.Friend.BlockFriend:output_type -> friend.BlockFriendResp
-	8,  // [8:14] is the sub-list for method output_type
-	2,  // [2:8] is the sub-list for method input_type
+	15, // 8: friend.Friend.UnblockFriend:input_type -> friend.UnblockFriendReq
+	17, // 9: friend.Friend.GetBlockedList:input_type -> friend.GetBlockedListReq
+	2,  // 10: friend.Friend.SendFriendRequest:output_type -> friend.SendFriendRequestResponse
+	5,  // 11: friend.Friend.GetFriendRequests:output_type -> friend.GetFriendRequestsResponse
+	7,  // 12: friend.Friend.RespondFriendRequest:output_type -> friend.RespondFriendRequestResponse
+	12, // 13: friend.Friend.GetFriends:output_type -> friend.GetFriendsResponse
+	9,  // 14: friend.Friend.DeleteFriend:output_type -> friend.DeleteFriendResponse
+	14, // 15: friend.Friend.BlockFriend:output_type -> friend.BlockFriendResp
+	16, // 16: friend.Friend.UnblockFriend:output_type -> friend.UnblockFriendResp
+	18, // 17: friend.Friend.GetBlockedList:output_type -> friend.GetBlockedListResp
+	10, // [10:18] is the sub-list for method output_type
+	2,  // [2:10] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -898,7 +1104,7 @@ func file_common_proto_friend_friend_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_friend_friend_proto_rawDesc), len(file_common_proto_friend_friend_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   14,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

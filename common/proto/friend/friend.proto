@@ -82,7 +82,24 @@ message BlockFriendResp {
   string msg = 1;
 }
 
+// 取消拉黑
+message UnblockFriendReq {
+  int64 user_id = 1;
+  int64 target_id = 2;
+}
 
+message UnblockFriendResp {
+  string msg = 1;
+}
+
+// 获取拉黑列表请求和响应
+message GetBlockedListReq {
+  int64 user_id = 1;
+}
+
+message GetBlockedListResp {
+  repeated int64 blocked_ids = 1;
+}
 // 定义服务接口
 service Friend {
   rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse);
@@ -91,4 +108,6 @@ service Friend {
   rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
   rpc DeleteFriend(DeleteFriendRequest) returns (DeleteFriendResponse);
   rpc BlockFriend(BlockFriendReq) returns (BlockFriendResp);
+  rpc UnblockFriend(UnblockFriendReq) returns (UnblockFriendResp);
+  rpc GetBlockedList(GetBlockedListReq) returns (GetBlockedListResp);
 }

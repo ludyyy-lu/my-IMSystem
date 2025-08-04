@@ -19,6 +19,8 @@ type (
 		GetFriends(ctx context.Context, in *GetFriendsRequest, opts ...grpc.CallOption) (*GetFriendsResponse, error)
 		DeleteFriend(ctx context.Context, in *DeleteFriendRequest, opts ...grpc.CallOption) (*DeleteFriendResponse, error)
 		BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error)
+		UnblockFriend(ctx context.Context, in *UnblockFriendReq, opts ...grpc.CallOption) (*UnblockFriendResp, error)
+		GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error)
 	}
 
 	defaultFriend struct {
@@ -60,4 +62,14 @@ func (m *defaultFriend) DeleteFriend(ctx context.Context, in *DeleteFriendReques
 func (m *defaultFriend) BlockFriend(ctx context.Context, in *BlockFriendReq, opts ...grpc.CallOption) (*BlockFriendResp, error) {
 	client := NewFriendClient(m.cli.Conn())
 	return client.BlockFriend(ctx, in, opts...)
+}
+
+func (m *defaultFriend) UnblockFriend(ctx context.Context, in *UnblockFriendReq, opts ...grpc.CallOption) (*UnblockFriendResp, error) {
+	client := NewFriendClient(m.cli.Conn())
+	return client.UnblockFriend(ctx, in, opts...)
+}
+
+func (m *defaultFriend) GetBlockedList(ctx context.Context, in *GetBlockedListReq, opts ...grpc.CallOption) (*GetBlockedListResp, error) {
+	client := NewFriendClient(m.cli.Conn())
+	return client.GetBlockedList(ctx, in, opts...)
 }
