@@ -8,3 +8,6 @@ Etcd:
 JwtAuth:
   AccessSecret: my-secret-key
   AccessExpire: 604800  # 7 天秒数
+
+Mysql:
+  DataSource: imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local
