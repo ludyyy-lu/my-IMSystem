@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"my-IMSystem/auth-service/auth"
+	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"

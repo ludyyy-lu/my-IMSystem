@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"my-IMSystem/auth-service/auth"
+	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/logic"
 	"my-IMSystem/auth-service/internal/svc"
 )
