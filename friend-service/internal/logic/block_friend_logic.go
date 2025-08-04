@@ -40,8 +40,7 @@ func (l *BlockFriendLogic) BlockFriend(in *friend_friend.BlockFriendReq) (*frien
 	if err == nil {
 		// 已经拉黑过了
 		return &friend_friend.BlockFriendResp{Msg: "已拉黑该用户"}, nil
-	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	}else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.Internal, "查询拉黑记录失败")
 	}
 
