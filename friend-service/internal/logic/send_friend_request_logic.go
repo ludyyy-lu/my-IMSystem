@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"my-IMSystem/common/kafka"
 	"my-IMSystem/common/common_model"
+	"my-IMSystem/common/kafka"
 	friend_friend "my-IMSystem/friend-service/friend"
 	"my-IMSystem/friend-service/internal/model"
 	"my-IMSystem/friend-service/internal/svc"
@@ -31,6 +31,13 @@ func NewSendFriendRequestLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *SendFriendRequestLogic) SendFriendRequest(in *friend_friend.SendFriendRequestRequest) (*friend_friend.SendFriendRequestResponse, error) {
 	// todo: add your logic here and delete this line
 	db := l.svcCtx.DB
+	// Step 0: 检查是否被拉黑
+	// 添加好友可以直接查询好友库，但是chat服务就不行，微服务，所以用rpc跨服务调用
+	// 此处直接查询数据库
+	var blockedUser model.BlockedUser
+	if err := db.Where("user_id = ? AND blocked_id = ?", in.ToUserId, in.FromUserId).First(&blockedUser).Error; err == nil {
+		return nil, errors.New("对方已将你拉黑，无法发送好友请求")
+	}
 
 	// Step 1: 检查是否已经是好友
 	var existingFriend model.Friend
@@ -61,7 +68,7 @@ func (l *SendFriendRequestLogic) SendFriendRequest(in *friend_friend.SendFriendR
 		FromUser:  in.FromUserId,
 		ToUser:    in.ToUserId,
 		Timestamp: time.Now().Unix(),
-		Extra:    in.Remark, // 附加信息
+		Extra:     in.Remark, // 附加信息
 	}); err != nil {
 		return nil, errors.New("failed to send friend request event to Kafka: " + err.Error())
 	}
