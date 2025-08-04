@@ -3,10 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
+	"time"
 
 	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/model"
 	"my-IMSystem/auth-service/internal/svc"
+	"my-IMSystem/common/utils"
 	"my-IMSystem/pkg/jwt"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -54,14 +56,21 @@ func (l *RegisterLogic) Register(in *auth_auth.RegisterReq) (*auth_auth.Register
 	}
 
 	// 4. 生成 token
-	token, err := jwt.GenerateToken(user.ID, []byte(l.svcCtx.Config.JwtAuth.AccessSecret))
+	accessToken, err := jwt.GenerateToken(user.ID, l.svcCtx.Config.JwtAuth.AccessSecret)
 	if err != nil {
 		return nil, err
 	}
 
+	refreshToken, err := jwt.GenerateRefreshToken(user.ID, l.svcCtx.Config.JwtAuth.AccessSecret)
+	if err != nil {
+		return nil, err
+	}
+	exp := time.Now().Add(7 * 24 * time.Hour).Unix() // 和 accessToken 一致
+
+	// 5. 构造返回值
 	return &auth_auth.RegisterResp{
-		Token: token,
-		Uid:   user.ID,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    exp,
 	}, nil
-	// return &auth_auth.RegisterResp{}, nil
 }
