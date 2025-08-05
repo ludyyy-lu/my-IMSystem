@@ -13,10 +13,10 @@ import (
 
 type (
 	User interface {
-		Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
-		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
-		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-		GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
+		GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileResp, error)
+		UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileResp, error)
+		BatchGetUsers(ctx context.Context, in *BatchGetUsersReq, opts ...grpc.CallOption) (*BatchGetUsersResp, error)
+		SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error)
 	}
 
 	defaultUser struct {
@@ -30,22 +30,22 @@ func NewUser(cli zrpc.Client) User {
 	}
 }
 
-func (m *defaultUser) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
-	client := NewUserClient(m.cli.Conn())
-	return client.Register(ctx, in, opts...)
-}
-
-func (m *defaultUser) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
-	client := NewUserClient(m.cli.Conn())
-	return client.GetUser(ctx, in, opts...)
-}
-
-func (m *defaultUser) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	client := NewUserClient(m.cli.Conn())
-	return client.Login(ctx, in, opts...)
-}
-
-func (m *defaultUser) GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error) {
+func (m *defaultUser) GetProfile(ctx context.Context, in *GetProfileReq, opts ...grpc.CallOption) (*GetProfileResp, error) {
 	client := NewUserClient(m.cli.Conn())
 	return client.GetProfile(ctx, in, opts...)
+}
+
+func (m *defaultUser) UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileResp, error) {
+	client := NewUserClient(m.cli.Conn())
+	return client.UpdateProfile(ctx, in, opts...)
+}
+
+func (m *defaultUser) BatchGetUsers(ctx context.Context, in *BatchGetUsersReq, opts ...grpc.CallOption) (*BatchGetUsersResp, error) {
+	client := NewUserClient(m.cli.Conn())
+	return client.BatchGetUsers(ctx, in, opts...)
+}
+
+func (m *defaultUser) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error) {
+	client := NewUserClient(m.cli.Conn())
+	return client.SearchUser(ctx, in, opts...)
 }
