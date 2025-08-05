@@ -4,9 +4,12 @@ import (
 	"context"
 
 	auth_auth "my-IMSystem/auth-service/auth"
+	"my-IMSystem/auth-service/internal/model"
 	"my-IMSystem/auth-service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type ListSessionsLogic struct {
@@ -25,7 +28,22 @@ func NewListSessionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 
 // 多设备：列出当前用户的所有活跃会话
 func (l *ListSessionsLogic) ListSessions(in *auth_auth.ListSessionsReq) (*auth_auth.ListSessionsResp, error) {
-	// todo: add your logic here and delete this line
+	var sessions []model.Session
+	err := l.svcCtx.DB.Where("uid = ?", in.UserId).Find(&sessions).Error
+	if err != nil {
+		return nil, status.Error(codes.Internal, "查询会话失败: "+err.Error())
+	}
 
-	return &auth_auth.ListSessionsResp{}, nil
+	var respSessions []*auth_auth.Session
+	for _, s := range sessions {
+		respSessions = append(respSessions, &auth_auth.Session{
+			DeviceId:  s.DeviceId,
+			LoginAt:   s.CreatedAt.Unix(),
+			ExpiresAt: s.ExpiresAt.Unix(),
+		})
+	}
+
+	return &auth_auth.ListSessionsResp{
+		Sessions: respSessions,
+	}, nil
 }
