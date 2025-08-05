@@ -1,14 +1,13 @@
 package model
 
-import (
-	"time"
-)
-// 用户结构表
+import "time"
+
 type User struct {
-	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	Username  string    `gorm:"unique;not null;size:64" json:"username"`
-	Password  string    `gorm:"not null;size:128" json:"-"` // 加密后存储，响应时不返回
-	Nickname  string    `gorm:"size:64" json:"nickname"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	ID        int64     `gorm:"primaryKey;autoIncrement"`
+	Nickname  string    `gorm:"type:varchar(64);not null"`
+	Avatar    string    `gorm:"type:varchar(255);default:''"`
+	Bio       string    `gorm:"type:varchar(255);default:''"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	Disabled  bool      `gorm:"default:false"`
+	Gender    int32     `gorm:"default:0"` // 0未知 1男 2女
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"my-IMSystem/user-service/internal/svc"
-	"my-IMSystem/user-service/user"
+	user_user "my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
