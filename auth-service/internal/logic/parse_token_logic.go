@@ -26,7 +26,6 @@ func NewParseTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ParseT
 
 // 解析 token，提取 userId（如 userId, deviceId）
 func (l *ParseTokenLogic) ParseToken(in *auth_auth.ParseTokenReq) (*auth_auth.ParseTokenResp, error) {
-	// todo: add your logic here and delete this line
 	claims, err := jwt.ParseToken(in.AccessToken, l.svcCtx.Config.JwtAuth.AccessSecret)
 	if err != nil {
 		return nil, err

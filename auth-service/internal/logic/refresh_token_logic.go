@@ -47,6 +47,4 @@ func (l *RefreshTokenLogic) RefreshToken(in *auth_auth.RefreshTokenReq) (*auth_a
 		AccessToken: accessToken,
 		ExpiresAt:   expiresAt,
 	}, nil
-
-	// return &auth_auth.RefreshTokenResp{}, nil
 }

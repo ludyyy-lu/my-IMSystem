@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"time"
 
 	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/model"
@@ -30,7 +31,6 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 
 // 用户登录：验证账号密码，返回 token
 func (l *LoginLogic) Login(in *auth_auth.LoginReq) (*auth_auth.LoginResp, error) {
-	// todo: add your logic here and delete this line
 	// 查用户
 	var user model.User
 	if err := l.svcCtx.DB.Where("username = ?", in.Username).First(&user).Error; err != nil {
@@ -43,15 +43,16 @@ func (l *LoginLogic) Login(in *auth_auth.LoginReq) (*auth_auth.LoginResp, error)
 	}
 
 	// 生成 token
-	accessToken, err := jwt.GenerateToken(user.ID, "",l.svcCtx.Config.JwtAuth.AccessSecret)
+	accessToken, err := jwt.GenerateToken(user.ID, in.DeviceId, l.svcCtx.Config.JwtAuth.AccessSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user.ID,"", l.svcCtx.Config.JwtAuth.AccessSecret)
+	refreshToken, err := jwt.GenerateRefreshToken(user.ID, in.DeviceId, l.svcCtx.Config.JwtAuth.AccessSecret)
 	if err != nil {
 		return nil, err
 	}
+	accessExpire := time.Now().Add(7 * 24 * time.Hour) // 和 jwt 里设置的过期时间保持一致
 
 	// 保存 Session
 	session := &model.Session{
@@ -59,7 +60,7 @@ func (l *LoginLogic) Login(in *auth_auth.LoginReq) (*auth_auth.LoginResp, error)
 		DeviceId:     in.DeviceId,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		// ExpiresAt:    accessExpire,
+		ExpiresAt:    accessExpire,
 	}
 	if err := l.svcCtx.DB.Create(session).Error; err != nil {
 		return nil, err
@@ -69,6 +70,6 @@ func (l *LoginLogic) Login(in *auth_auth.LoginReq) (*auth_auth.LoginResp, error)
 	return &auth_auth.LoginResp{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		// ExpiresAt:    accessExpire.Unix(),
+		ExpiresAt:    accessExpire.Unix(),
 	}, nil
 }
