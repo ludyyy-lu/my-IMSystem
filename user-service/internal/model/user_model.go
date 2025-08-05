@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+
 	"gorm.io/gorm"
 )
 
@@ -20,4 +21,13 @@ func (m *UserModel) FindByID(ctx context.Context, id int64) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// 这有啥用？
+func (m *UserModel) UpdateUser(ctx context.Context, user *User) error {
+	return m.db.WithContext(ctx).Save(user).Error
+}
+
+func (m *UserModel) UpdateByID(ctx context.Context, id int64, updateData map[string]interface{}) error {
+	return m.db.WithContext(ctx).Model(&User{}).Where("id = ?", id).Updates(updateData).Error
 }

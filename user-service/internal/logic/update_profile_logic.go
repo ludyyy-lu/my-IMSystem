@@ -24,7 +24,15 @@ func NewUpdateProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 }
 
 func (l *UpdateProfileLogic) UpdateProfile(in *user_user.UpdateProfileReq) (*user_user.UpdateProfileResp, error) {
-	// todo: add your logic here and delete this line
+	updateData := map[string]any{
+		"nickname": in.Nickname,
+		"avatar":   in.Avatar,
+		"bio":      in.Bio,
+	}
 
-	return &user_user.UpdateProfileResp{}, nil
+	err := l.svcCtx.UserModel.UpdateByID(l.ctx, in.UserId, updateData)
+	if err != nil {
+		return &user_user.UpdateProfileResp{Success: false}, err
+	}
+	return &user_user.UpdateProfileResp{Success: true}, nil
 }
