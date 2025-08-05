@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"my-IMSystem/pkg/jwt"
+	"my-IMSystem/auth-service/auth"
 	"my-IMSystem/ws-gateway/internal/logic"
 	"my-IMSystem/ws-gateway/internal/svc"
 
@@ -32,13 +32,15 @@ func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
 
-		// 2. 校验 token
-		claims, err := jwt.ParseToken(token)
-		if err != nil {
+		// 2. 远程调用 Auth 服务校验 token
+		resp, err := svcCtx.AuthRpc.VerifyToken(r.Context(), &auth.VerifyTokenReq{
+			AccessToken: token,
+		})
+		if err != nil || !resp.Valid {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
-		userId := claims.Uid
+		userId := resp.UserId
 
 		// 3. 升级为 WebSocket 连接
 		conn, err := upgrader.Upgrade(w, r, nil)
