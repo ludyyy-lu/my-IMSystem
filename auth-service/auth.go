@@ -6,6 +6,7 @@ import (
 
 	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/config"
+	"my-IMSystem/auth-service/internal/interceptor"
 	"my-IMSystem/auth-service/internal/server"
 	"my-IMSystem/auth-service/internal/svc"
 
@@ -32,6 +33,9 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	// 拦截器注册在这儿
+	s.AddUnaryInterceptors(interceptor.AuthInterceptor(string(c.JwtAuth.AccessSecret)))
+
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
