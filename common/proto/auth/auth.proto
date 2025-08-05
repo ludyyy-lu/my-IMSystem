@@ -5,6 +5,7 @@ option go_package = "./auth;auth";
 message RegisterReq {
   string username = 1;
   string password = 2;
+  // 注册与设备无关 不需要 device_id
 }
 message RegisterResp {
   string access_token = 1;
@@ -15,7 +16,7 @@ message RegisterResp {
 message LoginReq {
   string username = 1;
   string password = 2;
-  string device_id = 3; // 用于多端登录识别（可选）
+  string device_id = 3; // 用于多端登录识别
 }
 message LoginResp {
   string access_token = 1;
@@ -30,6 +31,7 @@ message VerifyTokenResp {
   bool valid = 1;
   int64 user_id = 2;
   string device_id = 3;
+  // token本身含有device_id信息，但还是返回一下，方便调用方使用
 }
 // 解析 token
 message ParseTokenReq {
@@ -43,6 +45,7 @@ message ParseTokenResp {
 // 刷新 token
 message RefreshTokenReq {
   string refresh_token = 1;
+  string device_id = 2; // 用于标识设备
 }
 message RefreshTokenResp {
   string access_token = 1;
@@ -71,6 +74,7 @@ message LogoutSessionResp {
 // 生成 token（用于其他服务调用）
 message GenerateTokenReq {
   int64 uid = 1;
+  string device_id = 2; // 用于标识设备
 }
 message GenerateTokenResp {
   string token = 1;
