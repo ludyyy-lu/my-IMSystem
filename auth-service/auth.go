@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"my-IMSystem/auth-service/auth"
+	auth_auth "my-IMSystem/auth-service/auth"
 	"my-IMSystem/auth-service/internal/config"
 	"my-IMSystem/auth-service/internal/server"
 	"my-IMSystem/auth-service/internal/svc"

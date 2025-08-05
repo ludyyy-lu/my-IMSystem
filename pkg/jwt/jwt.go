@@ -10,14 +10,16 @@ import (
 
 type Claims struct {
 	Uid int64 `json:"uid"`
+	DeviceId string `json:"device_id"`
 	jwt.RegisteredClaims
 }
 
 // 生成 JWT token
-func GenerateToken(uid int64, secretKey []byte) (string, error) {
+func GenerateToken(uid int64, deviceID string, secretKey []byte) (string, error) {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &Claims{
 		Uid: uid,
+		DeviceId: deviceID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -28,10 +30,11 @@ func GenerateToken(uid int64, secretKey []byte) (string, error) {
 
 // 生成 Refresh Token
 // 这个 token 的过期时间更长，通常用于刷新 access token
-func GenerateRefreshToken(uid int64, secretKey []byte) (string, error) {
+func GenerateRefreshToken(uid int64, deviceID string, secretKey []byte) (string, error) {
 	expirationTime := time.Now().Add(30 * 24 * time.Hour) // 比 access 更久
 	claims := &Claims{
 		Uid: uid,
+		DeviceId: deviceID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
