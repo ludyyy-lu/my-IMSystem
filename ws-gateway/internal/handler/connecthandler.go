@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 
 func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// 🔐 1. 提取 token（从 header 或 query 参数）
+		// 1. 提取 token（从 header 或 query 参数）
 		token := r.Header.Get("Authorization")
 		if token == "" {
 			token = r.URL.Query().Get("token")
@@ -32,7 +32,7 @@ func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
 
-		// ✅ 2. 校验 token
+		// 2. 校验 token
 		claims, err := jwt.ParseToken(token)
 		if err != nil {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
@@ -40,14 +40,14 @@ func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		userId := claims.Uid
 
-		// 🔁 3. 升级为 WebSocket 连接
+		// 3. 升级为 WebSocket 连接
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			http.Error(w, "failed to upgrade to WebSocket", http.StatusInternalServerError)
 			return
 		}
 		logx.Infof("WebSocket connection established for user ID: %d", userId)
-		// ✅ 4. 将连接和 userId 交给逻辑层处理
+		// 4. 将连接和 userId 交给逻辑层处理
 		go logic.HandleWebSocketConnection(svcCtx, userId, conn)
 	}
 }

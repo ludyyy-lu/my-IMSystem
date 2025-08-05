@@ -18,6 +18,7 @@ type Config struct {
 		Brokers []string
 		Topic   string
 	}
-    //  gRPC 客户端 的配置结构 包含服务端点（Endpoints）、超时时间、连接池等参数
+	//  gRPC 客户端 的配置结构 包含服务端点（Endpoints）、超时时间、连接池等参数
 	ChatRpcConf zrpc.RpcClientConf
+	AuthRpcConf zrpc.RpcClientConf
 }

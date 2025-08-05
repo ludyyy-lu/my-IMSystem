@@ -15,5 +15,10 @@ Kafka:
 
 ChatRpcConf:
   Endpoints:
-    - 127.0.0.1:8081  
+    - 127.0.0.1:2379
   Timeout: 3000
+
+AuthRpcConf:
+  Endpoints:
+    - 127.0.0.1:2379
+  Key: auth.rpc

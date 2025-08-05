@@ -1,9 +1,11 @@
 package svc
 
 import (
+	"my-IMSystem/auth-service/auth"
 	"my-IMSystem/chat-service/chat"
 	"my-IMSystem/ws-gateway/internal/config"
 	"my-IMSystem/ws-gateway/internal/conn"
+
 	//"my-IMSystem/ws-gateway/internal/kafka"
 	"my-IMSystem/common/kafka"
 
@@ -17,6 +19,7 @@ type ServiceContext struct {
 	OfflineStore *conn.RedisOfflineMsgStore // 离线消息存储
 	RedisClient  *redis.Client              // 如果需要 Redis 支持，可以添加
 	ChatRpc      chat.ChatClient
+	AuthRpc      auth.AuthClient // 认证服务 RPC 客户端
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -33,7 +36,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ConnManager:  conn.NewConnManager(),
 		OfflineStore: conn.NewRedisOfflineMsgStore(rdb),
 		RedisClient:  rdb,
-		ChatRpc: chat.NewChatClient(zrpc.MustNewClient(c.ChatRpcConf).Conn()),
-
+		ChatRpc:      chat.NewChatClient(zrpc.MustNewClient(c.ChatRpcConf).Conn()),
+		AuthRpc:      auth.NewAuthClient(zrpc.MustNewClient(c.AuthRpcConf).Conn()),
 	}
 }
