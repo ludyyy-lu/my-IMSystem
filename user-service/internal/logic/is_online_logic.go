@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"my-IMSystem/user-service/internal/svc"
 	user_user "my-IMSystem/user-service/user"
@@ -24,7 +25,15 @@ func NewIsOnlineLogic(ctx context.Context, svcCtx *svc.ServiceContext) *IsOnline
 }
 
 func (l *IsOnlineLogic) IsOnline(in *user_user.IsOnlineReq) (*user_user.IsOnlineResp, error) {
-	// todo: add your logic here and delete this line
+	key := "im:online:users"
+	uid := in.Uid
 
-	return &user_user.IsOnlineResp{}, nil
+	exists, err := l.svcCtx.RedisClient.SIsMember(l.ctx, key, uid).Result()
+	if err != nil {
+		return nil, fmt.Errorf("redis error: %v", err)
+	}
+
+	return &user_user.IsOnlineResp{
+		Online: exists,
+	}, nil
 }
