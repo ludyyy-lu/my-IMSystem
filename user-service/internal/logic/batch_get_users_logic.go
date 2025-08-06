@@ -7,6 +7,8 @@ import (
 	user_user "my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type BatchGetUsersLogic struct {
@@ -24,7 +26,25 @@ func NewBatchGetUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Bat
 }
 
 func (l *BatchGetUsersLogic) BatchGetUsers(in *user_user.BatchGetUsersReq) (*user_user.BatchGetUsersResp, error) {
-	// todo: add your logic here and delete this line
+	users, err := l.svcCtx.UserModel.FindByIDs(l.ctx, in.Uids)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "获取用户信息失败")
+	}
 
-	return &user_user.BatchGetUsersResp{}, nil
+	var userInfos []*user_user.UserInfo
+	for _, u := range users {
+		userInfos = append(userInfos, &user_user.UserInfo{
+			Id:        u.ID,
+			Nickname:  u.Nickname,
+			Avatar:    u.Avatar,
+			Bio:       u.Bio,
+			CreatedAt: u.CreatedAt.Unix(),
+			Disabled:  u.Disabled,
+			Gender:    u.Gender,
+		})
+	}
+
+	return &user_user.BatchGetUsersResp{
+		Users: userInfos,
+	}, nil
 }
