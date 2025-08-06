@@ -496,6 +496,95 @@ func (x *SearchUserResp) GetResults() []*UserInfo {
 	return nil
 }
 
+// 查询用户是否在线
+type IsOnlineReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsOnlineReq) Reset() {
+	*x = IsOnlineReq{}
+	mi := &file_common_proto_user_user_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsOnlineReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsOnlineReq) ProtoMessage() {}
+
+func (x *IsOnlineReq) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_user_user_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsOnlineReq.ProtoReflect.Descriptor instead.
+func (*IsOnlineReq) Descriptor() ([]byte, []int) {
+	return file_common_proto_user_user_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *IsOnlineReq) GetUid() int64 {
+	if x != nil {
+		return x.Uid
+	}
+	return 0
+}
+
+type IsOnlineResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Online        bool                   `protobuf:"varint,1,opt,name=online,proto3" json:"online,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsOnlineResp) Reset() {
+	*x = IsOnlineResp{}
+	mi := &file_common_proto_user_user_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsOnlineResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsOnlineResp) ProtoMessage() {}
+
+func (x *IsOnlineResp) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_user_user_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsOnlineResp.ProtoReflect.Descriptor instead.
+func (*IsOnlineResp) Descriptor() ([]byte, []int) {
+	return file_common_proto_user_user_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *IsOnlineResp) GetOnline() bool {
+	if x != nil {
+		return x.Online
+	}
+	return false
+}
+
 var File_common_proto_user_user_proto protoreflect.FileDescriptor
 
 const file_common_proto_user_user_proto_rawDesc = "" +
@@ -528,14 +617,19 @@ const file_common_proto_user_user_proto_rawDesc = "" +
 	"\rSearchUserReq\x12\x18\n" +
 	"\akeyword\x18\x01 \x01(\tR\akeyword\":\n" +
 	"\x0eSearchUserResp\x12(\n" +
-	"\aresults\x18\x01 \x03(\v2\x0e.user.UserInfoR\aresults2\xfc\x01\n" +
+	"\aresults\x18\x01 \x03(\v2\x0e.user.UserInfoR\aresults\"\x1f\n" +
+	"\vIsOnlineReq\x12\x10\n" +
+	"\x03uid\x18\x01 \x01(\x03R\x03uid\"&\n" +
+	"\fIsOnlineResp\x12\x16\n" +
+	"\x06online\x18\x01 \x01(\bR\x06online2\xaf\x02\n" +
 	"\x04User\x127\n" +
 	"\n" +
 	"GetProfile\x12\x13.user.GetProfileReq\x1a\x14.user.GetProfileResp\x12@\n" +
 	"\rUpdateProfile\x12\x16.user.UpdateProfileReq\x1a\x17.user.UpdateProfileResp\x12@\n" +
 	"\rBatchGetUsers\x12\x16.user.BatchGetUsersReq\x1a\x17.user.BatchGetUsersResp\x127\n" +
 	"\n" +
-	"SearchUser\x12\x13.user.SearchUserReq\x1a\x14.user.SearchUserRespB\rZ\v./user;userb\x06proto3"
+	"SearchUser\x12\x13.user.SearchUserReq\x1a\x14.user.SearchUserResp\x121\n" +
+	"\bIsOnline\x12\x11.user.IsOnlineReq\x1a\x12.user.IsOnlineRespB\rZ\v./user;userb\x06proto3"
 
 var (
 	file_common_proto_user_user_proto_rawDescOnce sync.Once
@@ -549,7 +643,7 @@ func file_common_proto_user_user_proto_rawDescGZIP() []byte {
 	return file_common_proto_user_user_proto_rawDescData
 }
 
-var file_common_proto_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_common_proto_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_common_proto_user_user_proto_goTypes = []any{
 	(*UserInfo)(nil),          // 0: user.UserInfo
 	(*GetProfileReq)(nil),     // 1: user.GetProfileReq
@@ -560,24 +654,28 @@ var file_common_proto_user_user_proto_goTypes = []any{
 	(*BatchGetUsersResp)(nil), // 6: user.BatchGetUsersResp
 	(*SearchUserReq)(nil),     // 7: user.SearchUserReq
 	(*SearchUserResp)(nil),    // 8: user.SearchUserResp
+	(*IsOnlineReq)(nil),       // 9: user.IsOnlineReq
+	(*IsOnlineResp)(nil),      // 10: user.IsOnlineResp
 }
 var file_common_proto_user_user_proto_depIdxs = []int32{
-	0, // 0: user.GetProfileResp.user:type_name -> user.UserInfo
-	0, // 1: user.BatchGetUsersResp.users:type_name -> user.UserInfo
-	0, // 2: user.SearchUserResp.results:type_name -> user.UserInfo
-	1, // 3: user.User.GetProfile:input_type -> user.GetProfileReq
-	3, // 4: user.User.UpdateProfile:input_type -> user.UpdateProfileReq
-	5, // 5: user.User.BatchGetUsers:input_type -> user.BatchGetUsersReq
-	7, // 6: user.User.SearchUser:input_type -> user.SearchUserReq
-	2, // 7: user.User.GetProfile:output_type -> user.GetProfileResp
-	4, // 8: user.User.UpdateProfile:output_type -> user.UpdateProfileResp
-	6, // 9: user.User.BatchGetUsers:output_type -> user.BatchGetUsersResp
-	8, // 10: user.User.SearchUser:output_type -> user.SearchUserResp
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0,  // 0: user.GetProfileResp.user:type_name -> user.UserInfo
+	0,  // 1: user.BatchGetUsersResp.users:type_name -> user.UserInfo
+	0,  // 2: user.SearchUserResp.results:type_name -> user.UserInfo
+	1,  // 3: user.User.GetProfile:input_type -> user.GetProfileReq
+	3,  // 4: user.User.UpdateProfile:input_type -> user.UpdateProfileReq
+	5,  // 5: user.User.BatchGetUsers:input_type -> user.BatchGetUsersReq
+	7,  // 6: user.User.SearchUser:input_type -> user.SearchUserReq
+	9,  // 7: user.User.IsOnline:input_type -> user.IsOnlineReq
+	2,  // 8: user.User.GetProfile:output_type -> user.GetProfileResp
+	4,  // 9: user.User.UpdateProfile:output_type -> user.UpdateProfileResp
+	6,  // 10: user.User.BatchGetUsers:output_type -> user.BatchGetUsersResp
+	8,  // 11: user.User.SearchUser:output_type -> user.SearchUserResp
+	10, // 12: user.User.IsOnline:output_type -> user.IsOnlineResp
+	8,  // [8:13] is the sub-list for method output_type
+	3,  // [3:8] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_common_proto_user_user_proto_init() }
@@ -591,7 +689,7 @@ func file_common_proto_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_user_user_proto_rawDesc), len(file_common_proto_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

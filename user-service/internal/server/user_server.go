@@ -42,3 +42,8 @@ func (s *UserServer) SearchUser(ctx context.Context, in *user_user.SearchUserReq
 	l := logic.NewSearchUserLogic(ctx, s.svcCtx)
 	return l.SearchUser(in)
 }
+
+func (s *UserServer) IsOnline(ctx context.Context, in *user_user.IsOnlineReq) (*user_user.IsOnlineResp, error) {
+	l := logic.NewIsOnlineLogic(ctx, s.svcCtx)
+	return l.IsOnline(in)
+}

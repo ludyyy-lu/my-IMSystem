@@ -17,6 +17,7 @@ type (
 		UpdateProfile(ctx context.Context, in *UpdateProfileReq, opts ...grpc.CallOption) (*UpdateProfileResp, error)
 		BatchGetUsers(ctx context.Context, in *BatchGetUsersReq, opts ...grpc.CallOption) (*BatchGetUsersResp, error)
 		SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error)
+		IsOnline(ctx context.Context, in *IsOnlineReq, opts ...grpc.CallOption) (*IsOnlineResp, error)
 	}
 
 	defaultUser struct {
@@ -48,4 +49,9 @@ func (m *defaultUser) BatchGetUsers(ctx context.Context, in *BatchGetUsersReq, o
 func (m *defaultUser) SearchUser(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*SearchUserResp, error) {
 	client := NewUserClient(m.cli.Conn())
 	return client.SearchUser(ctx, in, opts...)
+}
+
+func (m *defaultUser) IsOnline(ctx context.Context, in *IsOnlineReq, opts ...grpc.CallOption) (*IsOnlineResp, error) {
+	client := NewUserClient(m.cli.Conn())
+	return client.IsOnline(ctx, in, opts...)
 }

@@ -48,6 +48,13 @@ message SearchUserResp {
   repeated UserInfo results = 1;
 }
 
+// 查询用户是否在线
+message IsOnlineReq {
+  int64 uid = 1;
+}
+message IsOnlineResp {
+  bool online = 1;
+}
 
 // 服务定义（RPC 接口）
 service User {
@@ -55,6 +62,7 @@ service User {
   rpc UpdateProfile(UpdateProfileReq) returns (UpdateProfileResp);
   rpc BatchGetUsers(BatchGetUsersReq) returns (BatchGetUsersResp);
   rpc SearchUser(SearchUserReq) returns (SearchUserResp);
+  rpc IsOnline(IsOnlineReq) returns (IsOnlineResp);
 }
 
 // goctl rpc protoc common/proto/user/user.proto \
