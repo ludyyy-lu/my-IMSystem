@@ -7,6 +7,8 @@ import (
 	user_user "my-IMSystem/user-service/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type SearchUserLogic struct {
@@ -24,7 +26,24 @@ func NewSearchUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Search
 }
 
 func (l *SearchUserLogic) SearchUser(in *user_user.SearchUserReq) (*user_user.SearchUserResp, error) {
-	// todo: add your logic here and delete this line
+	users, err := l.svcCtx.UserModel.SearchByKeyword(l.ctx, in.Keyword)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "搜索失败")
+	}
 
-	return &user_user.SearchUserResp{}, nil
+	var userInfos []*user_user.UserInfo
+	for _, u := range users {
+		userInfos = append(userInfos, &user_user.UserInfo{
+			Id:        u.ID,
+			Nickname:  u.Nickname,
+			Avatar:    u.Avatar,
+			Bio:       u.Bio,
+			CreatedAt: u.CreatedAt.Unix(),
+			Disabled:  u.Disabled,
+			Gender:    u.Gender,
+		})
+	}
+	return &user_user.SearchUserResp{
+		Results: userInfos,
+	}, nil
 }

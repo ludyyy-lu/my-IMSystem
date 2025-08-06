@@ -41,3 +41,14 @@ func (m *UserModel) FindByIDs(ctx context.Context, ids []int64) ([]*User, error)
 	}
 	return users, nil
 }
+
+func (m *UserModel) SearchByKeyword(ctx context.Context, keyword string) ([]*User, error) {
+	var users []*User
+	if err := m.db.WithContext(ctx).
+		Where("nickname LIKE ?", "%"+keyword+"%").
+		Limit(20).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
