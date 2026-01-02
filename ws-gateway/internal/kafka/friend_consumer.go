@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"my-IMSystem/common/common_model"
-	"my-IMSystem/ws-gateway/internal/ws"
+	"my-IMSystem/ws-gateway/internal/ws1"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -32,7 +32,7 @@ func StartFriendConsumer(brokers []string, topic string) {
 			}
 			log.Printf("[FriendEvent] %+v\n", event)
 			// 推送给接收者（ToUserID）
-			ws.PushToUser(event.ToUser, event)
+			ws1.PushToUser(event.ToUser, event)
 		}
 	}()
 }

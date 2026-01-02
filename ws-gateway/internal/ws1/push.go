@@ -1,5 +1,5 @@
 // ws/push.go
-package ws
+package ws1
 
 import (
 	"encoding/json"

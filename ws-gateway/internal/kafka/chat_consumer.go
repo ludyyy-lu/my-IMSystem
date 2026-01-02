@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"my-IMSystem/common/common_model"
-	"my-IMSystem/ws-gateway/internal/ws"
+	"my-IMSystem/ws-gateway/internal/ws1"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -32,7 +32,7 @@ func StartChatConsumer(brokers []string, topic string) {
 			}
 
 			// 调用 WebSocket 推送
-			ws.PushToUser(msg.ToUserId, msg)
+			ws1.PushToUser(msg.ToUserId, msg)
 		}
 	}()
 }
