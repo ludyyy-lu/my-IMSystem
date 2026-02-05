@@ -50,7 +50,6 @@ func (c *Connection) Start() {
 		return nil
 	})
 
-	go c.readLoop()
 	go c.pingLoop()
 	go c.loadOfflineMessages()
 }

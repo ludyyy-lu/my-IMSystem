@@ -32,7 +32,7 @@ func StartFriendConsumer(brokers []string, topic string) {
 			}
 			log.Printf("[FriendEvent] %+v\n", event)
 			// 推送给接收者（ToUserID）
-			ws1.PushToUser(event.ToUser, event)
+			ws1.PushToUser(event.ToUser, "friend_event", event)
 		}
 	}()
 }

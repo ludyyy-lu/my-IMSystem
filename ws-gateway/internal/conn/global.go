@@ -4,6 +4,6 @@ package conn
 var GlobalConnManager *ConnManager
 
 // 初始化这个变量，创建一个新的连接管理器实例
-func InitGlobalConnManager() {
-	GlobalConnManager = NewConnManager()
+func InitGlobalConnManager() *ConnManager {
+	return NewConnManager()
 }

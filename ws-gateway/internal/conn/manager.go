@@ -11,7 +11,11 @@ type ConnManager struct {
 }
 
 func NewConnManager() *ConnManager {
-	return &ConnManager{}
+	if GlobalConnManager != nil {
+		return GlobalConnManager
+	}
+	GlobalConnManager = &ConnManager{}
+	return GlobalConnManager
 }
 
 func (m *ConnManager) Add(uid int64, conn *websocket.Conn) {

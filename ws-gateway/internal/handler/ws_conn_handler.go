@@ -26,6 +26,10 @@ func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		if token == "" {
 			token = r.URL.Query().Get("token")
 		}
+		protocolToken := r.Header.Get("Sec-Websocket-Protocol")
+		if token == "" {
+			token = protocolToken
+		}
 		if token == "" {
 			http.Error(w, "unauthorized: token is required", http.StatusUnauthorized)
 			return
@@ -43,7 +47,11 @@ func connectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		userId := resp.UserId
 
 		// 3. 升级为 WebSocket 连接
-		conn, err := upgrader.Upgrade(w, r, nil)
+		responseHeader := http.Header{}
+		if protocolToken != "" {
+			responseHeader.Set("Sec-WebSocket-Protocol", protocolToken)
+		}
+		conn, err := upgrader.Upgrade(w, r, responseHeader)
 		if err != nil {
 			http.Error(w, "failed to upgrade to WebSocket", http.StatusInternalServerError)
 			return

@@ -32,7 +32,7 @@ func StartChatConsumer(brokers []string, topic string) {
 			}
 
 			// 调用 WebSocket 推送
-			ws1.PushToUser(msg.ToUserId, msg)
+			ws1.PushToUser(msg.ToUserId, "chat_message", msg)
 		}
 	}()
 }

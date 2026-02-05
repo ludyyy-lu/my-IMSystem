@@ -5,7 +5,6 @@ import (
 	"my-IMSystem/chat-service/chat"
 	"my-IMSystem/ws-gateway/internal/config"
 	"my-IMSystem/ws-gateway/internal/conn"
-	"my-IMSystem/ws-gateway/internal/ws"
 
 	// "my-IMSystem/ws-gateway/internal/conn"
 
@@ -19,7 +18,6 @@ import (
 type ServiceContext struct {
 	Config       config.Config
 	ConnManager  *conn.ConnManager
-	ConnMgr      *ws.ConnManager
 	OfflineStore *conn.RedisOfflineMsgStore // 离线消息存储
 	RedisClient  *redis.Client              // 如果需要 Redis 支持，可以添加
 	ChatRpc      chat.ChatClient
@@ -38,7 +36,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:       c,
 		ConnManager:  conn.NewConnManager(),
-		ConnMgr:      ws.NewConnManager(),
 		OfflineStore: conn.NewRedisOfflineMsgStore(rdb),
 		RedisClient:  rdb,
 		ChatRpc:      chat.NewChatClient(zrpc.MustNewClient(c.ChatRpcConf).Conn()),
