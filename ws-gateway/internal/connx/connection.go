@@ -77,20 +77,6 @@ func (c *Connection) loadOfflineMessages() {
 	c.SvcCtx.RedisClient.Del(c.ctx, fmt.Sprintf("offline:%d", c.UserId))
 }
 
-// readLoop handles incoming messages from the WebSocket connection.
-func (c *Connection) readLoop() {
-	defer c.Close()
-	for {
-		_, message, err := c.Conn.ReadMessage()
-		if err != nil {
-			log.Printf("read error for user %d: %v", c.UserId, err)
-			break
-		}
-		// Here you can handle the received message, e.g., dispatch to handler
-		log.Printf("Received message from user %d: %s", c.UserId, string(message))
-	}
-}
-
 // pingLoop sends periodic ping messages to keep the connection alive.
 func (c *Connection) pingLoop() {
 	ticker := time.NewTicker(pingPeriod)

@@ -10,11 +10,14 @@ type ConnManager struct {
 	conns sync.Map // map[int64]*websocket.Conn
 }
 
+var connManagerOnce sync.Once
+
 func NewConnManager() *ConnManager {
-	if GlobalConnManager != nil {
-		return GlobalConnManager
-	}
-	GlobalConnManager = &ConnManager{}
+	connManagerOnce.Do(func() {
+		if GlobalConnManager == nil {
+			GlobalConnManager = &ConnManager{}
+		}
+	})
 	return GlobalConnManager
 }
 
