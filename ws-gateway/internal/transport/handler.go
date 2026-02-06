@@ -93,8 +93,8 @@ func handleMessage(svcCtx *svc.ServiceContext, userId int64, payload []byte) {
 	}
 }
 
-func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.WsMessage) {
-	msg.From = fromUserId
+func handleChatMessage(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
+	msg.From = fromUserID
 	if svcCtx.Config.Kafka.Topic == "" {
 		logx.Error("Kafka topic is not configured")
 		return
@@ -104,7 +104,7 @@ func handleChatMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.W
 	}
 }
 
-func handleAckMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.WsMessage) {
+func handleAckMessage(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -115,11 +115,11 @@ func handleAckMessage(svcCtx *svc.ServiceContext, fromUserId int64, msg model.Ws
 
 	resp, err := svcCtx.ChatRpc.AckMessage(ctx, &chat.AckMessageReq{
 		MessageId: msg.Content,
-		UserId:    fromUserId,
+		UserId:    fromUserID,
 	})
 	if err != nil {
 		logx.Errorf("failed to send ACK to chat-service: %v", err)
 		return
 	}
-	logx.Infof("ACK sent for message %s from user %d | resp: %+v", msg.Content, fromUserId, resp)
+	logx.Infof("ACK sent for message %s from user %d | resp: %+v", msg.Content, fromUserID, resp)
 }

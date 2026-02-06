@@ -2,6 +2,7 @@ package push
 
 import (
 	"errors"
+	"log"
 
 	"my-IMSystem/ws-gateway/internal/session"
 )
@@ -23,7 +24,7 @@ func (d *Dispatcher) DispatchToUser(userID int64, data []byte) error {
 
 func (d *Dispatcher) DispatchToDevice(userID int64, device string, data []byte) error {
 	if device != "" {
-		return errors.New("device-specific routing not implemented")
+		log.Printf("device-specific routing not implemented, fallback to user dispatch for %s", device)
 	}
 	return d.DispatchToUser(userID, data)
 }
