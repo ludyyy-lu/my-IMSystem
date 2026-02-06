@@ -22,7 +22,9 @@ func (d *Dispatcher) DispatchToUser(userID int64, data []byte) error {
 }
 
 func (d *Dispatcher) DispatchToDevice(userID int64, device string, data []byte) error {
-	_ = device
+	if device != "" {
+		return errors.New("device routing not implemented")
+	}
 	return d.DispatchToUser(userID, data)
 }
 

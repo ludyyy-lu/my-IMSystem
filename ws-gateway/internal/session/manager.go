@@ -1,6 +1,9 @@
 package session
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
 
 type Manager struct {
 	mu       sync.RWMutex
@@ -33,7 +36,7 @@ func (m *Manager) Get(userID int64) (*Session, bool) {
 func (m *Manager) SendTo(userID int64, data []byte) error {
 	session, ok := m.Get(userID)
 	if !ok {
-		return nil
+		return errors.New("session not found")
 	}
 	return session.Send(data)
 }

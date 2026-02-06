@@ -12,7 +12,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func StartConsumers(brokers []string, chatTopic string, friendTopic string, pushService *push.Service) context.CancelFunc {
+func StartConsumersWithCancel(brokers []string, chatTopic string, friendTopic string, pushService *push.Service) context.CancelFunc {
 	ctx, cancel := context.WithCancel(context.Background())
 	if chatTopic != "" {
 		go startChatConsumer(ctx, brokers, chatTopic, pushService)

@@ -67,7 +67,7 @@ ws-gateway/
 `etc/ws.yaml` 示例：
 
 ```yaml
-Name: ws-api
+Name: ws-gateway
 Host: 0.0.0.0
 Port: 8888
 Redis:
