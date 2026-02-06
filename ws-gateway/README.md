@@ -1,52 +1,49 @@
 # ws-gateway
 
-`ws-gateway` 是 IM 系统的 WebSocket 网关，负责长连接管理、身份认证、消息路由以及 Kafka 推送。
+`ws-gateway` 是 IM 系统的 WebSocket 网关，负责长连接接入、消息路由与 Kafka 推送。
 
-## 功能概览
-
-- WebSocket 连接升级与鉴权（Auth RPC）
-- 连接池管理（ConnManager）
-- 心跳保活（Ping/Pong）
-- 消息路由：chat/ack
-- Kafka 消费推送（好友事件 & 聊天消息）
-- Redis 离线消息加载
-
-## 目录结构
+## 架构分层
 
 ```
 ws-gateway/
-├── ws.go                     # 服务入口
-├── etc/ws-api.yaml           # 配置文件
-├── api/ws.api                # API 定义
+├── ws.go                    # 启动入口（只做 wiring）
+├── etc/ws.yaml
 └── internal/
-    ├── handler/              # WebSocket 接入与路由
-    ├── logic/                # 消息解析与业务分发
-    ├── conn/                 # 连接池 + 离线消息存储
-    ├── connx/                # 单连接生命周期（心跳、离线加载）
-    ├── kafka/                # Kafka 消费者
-    ├── model/                # WebSocket 消息结构
-    ├── svc/                  # ServiceContext
-    ├── ws1/                  # 推送封装（Kafka -> WebSocket）
-    └── types/                # go-zero 生成类型
+    ├── transport/           # 传输层（WebSocket）
+    │   ├── server.go        # WS server 启动
+    │   ├── handler.go       # onConnect / onMessage / onClose
+    │   └── protocol.go      # WS 协议解析（JSON）
+    ├── session/             # 会话层（核心）
+    │   ├── manager.go       # ConnManager：uid -> session
+    │   ├── session.go       # 单连接 Session（心跳、写通道）
+    │   ├── state.go         # 在线 / 下线 / 重连
+    │   └── offline_store.go # 离线消息存储
+    ├── push/                # 推送层（只负责“投递”）
+    │   ├── service.go       # PushService
+    │   └── dispatcher.go    # uid / device / broadcast
+    ├── consume/             # 消费层（Kafka）
+    │   └── message.go       # 消费 im-message-topic
+    ├── model/               # WS 内部消息结构
+    │   ├── ws_message.go
+    │   └── push_message.go
+    ├── rpc/                 # 调用 IM 后端服务
+    │   └── auth.go          # token 校验
+    └── svc/
+        └── service_context.go
 ```
 
-## 连接与鉴权流程
+## 连接与消息流程
 
-1. 客户端发起连接：`GET /ws/connect`
-2. 从以下任意位置获取 token：
-   - `Authorization: Bearer <token>`
-   - `?token=<token>` 查询参数
-   - `Sec-Websocket-Protocol` 子协议
-3. 调用 `auth-service` 校验 token，获取用户 ID
-4. 升级为 WebSocket，并注册到 `ConnManager`
-5. 启动心跳循环与离线消息加载
-6. 连接关闭时移除连接
-
-> 如果客户端使用 `Sec-Websocket-Protocol` 传递 token，服务端会在握手响应中回传该子协议。
+1. 客户端连接 `/ws/connect`
+2. transport 层解析 token（Authorization / query / Sec-WebSocket-Protocol）
+3. rpc/auth 校验 token，创建 session
+4. session 管理心跳、读写与离线消息加载
+5. 收到消息后由 transport/router 分发至 chat/ack 逻辑
+6. consume 从 Kafka 接收推送消息，交由 push 层投递
 
 ## 消息格式
 
-客户端发送的 JSON：
+客户端发送：
 
 ```json
 {
@@ -56,12 +53,7 @@ ws-gateway/
 }
 ```
 
-目前支持的消息类型：
-
-- `chat`：聊天消息（会写入 Kafka）
-- `ack`：消息回执（通过 chat-service RPC 处理）
-
-服务端推送消息采用统一包裹：
+服务端推送：
 
 ```json
 {
@@ -70,42 +62,34 @@ ws-gateway/
 }
 ```
 
-`type` 目前包括：
+## 配置文件
 
-- `chat_message`
-- `friend_event`
+`etc/ws.yaml` 示例：
 
-## Kafka 数据流
-
-`ws.go` 启动两个消费者：
-
-- `im-chat-topic` -> `StartChatConsumer`
-- `im-friend-topic` -> `StartFriendConsumer`
-
-消费者读取消息后统一调用 `ws1.PushToUser`，通过连接池推送给在线用户。
-
-## 配置说明（etc/ws-api.yaml）
-
-关键配置项：
-
-- `Host` / `Port`：服务监听地址
-- `Redis`：离线消息读取
-- `Kafka.Brokers`：Kafka 集群地址
-- `ChatRpcConf`：chat-service RPC 端点
-- `AuthRpcConf`：auth-service RPC 端点
-
-> `Kafka.Topic` 目前用于发送消息（logic/connection.go）。如需开启发送功能，请在配置中补充该字段。
+```yaml
+Name: ws-api
+Host: 0.0.0.0
+Port: 8888
+Redis:
+  Addr: localhost:6379
+  Password: ""
+  DB: 0
+Kafka:
+  Brokers:
+    - kafka:9092
+  Topic: im-chat-topic
+ChatRpcConf:
+  Endpoints:
+    - 127.0.0.1:2379
+  Timeout: 3000
+AuthRpcConf:
+  Endpoints:
+    - 127.0.0.1:2379
+  Key: auth.rpc
+```
 
 ## 启动方式
 
 ```bash
-go run ws.go -f etc/ws-api.yaml
+go run ws.go -f etc/ws.yaml
 ```
-
-依赖服务：Kafka、Redis、auth-service、chat-service。
-
-## 常见问题
-
-- **invalid token**：确认 token 正确且 auth-service 可用。
-- **User not connected**：客户端没有保持 WebSocket 连接或连接已关闭。
-- **failed to upgrade**：浏览器跨域或协议头异常，请检查请求头。
