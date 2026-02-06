@@ -53,7 +53,9 @@ func (s *Session) Start() {
 		s.manager.Add(s)
 	}
 
-	s.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err := s.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+		log.Printf("failed to set read deadline for user %d: %v", s.UserID, err)
+	}
 	s.Conn.SetPongHandler(func(string) error {
 		s.Conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil

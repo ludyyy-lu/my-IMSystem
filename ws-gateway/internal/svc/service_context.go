@@ -19,7 +19,6 @@ type ServiceContext struct {
 	OfflineStore   *session.RedisOfflineMsgStore
 	RedisClient    *redis.Client
 	ChatRpc        chat.ChatClient
-	AuthRpc        auth.AuthClient
 	AuthService    *rpc.AuthService
 	PushService    *push.Service
 }
@@ -44,7 +43,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		OfflineStore:   offlineStore,
 		RedisClient:    rdb,
 		ChatRpc:        chatClient,
-		AuthRpc:        authClient,
 		AuthService:    rpc.NewAuthService(authClient),
 		PushService:    push.NewService(sessionManager),
 	}

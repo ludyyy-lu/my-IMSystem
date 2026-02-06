@@ -78,6 +78,7 @@ Kafka:
   Brokers:
     - kafka:9092
   Topic: im-chat-topic
+  FriendTopic: im-friend-topic
 ChatRpcConf:
   Endpoints:
     - 127.0.0.1:2379
