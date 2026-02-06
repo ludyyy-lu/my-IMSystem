@@ -22,9 +22,7 @@ func (d *Dispatcher) DispatchToUser(userID int64, data []byte) error {
 }
 
 func (d *Dispatcher) DispatchToDevice(userID int64, device string, data []byte) error {
-	if device == "" {
-		return d.DispatchToUser(userID, data)
-	}
+	_ = device
 	return d.DispatchToUser(userID, data)
 }
 

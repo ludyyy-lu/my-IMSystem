@@ -58,8 +58,8 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			logx.Infof("WebSocket connection closed for user ID: %d", uid)
 		}
 
-		userSession := session.NewSession(userId, conn, svcCtx.SessionManager, svcCtx.OfflineStore, onMessage, onClose)
-		userSession.Start()
+		sess := session.NewSession(userId, conn, svcCtx.SessionManager, svcCtx.OfflineStore, onMessage, onClose)
+		sess.Start()
 		logx.Infof("WebSocket connection established for user ID: %d", userId)
 	}
 }
