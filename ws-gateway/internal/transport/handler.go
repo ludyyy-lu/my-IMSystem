@@ -51,11 +51,11 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		onMessage := func(uid int64, payload []byte) {
-			handleMessage(svcCtx, uid, payload)
+		onMessage := func(userID int64, payload []byte) {
+			handleMessage(svcCtx, userID, payload)
 		}
-		onClose := func(uid int64) {
-			logx.Infof("WebSocket connection closed for user ID: %d", uid)
+		onClose := func(userID int64) {
+			logx.Infof("WebSocket connection closed for user ID: %d", userID)
 		}
 
 		sess := session.NewSession(userId, conn, svcCtx.SessionManager, svcCtx.OfflineStore, onMessage, onClose)
