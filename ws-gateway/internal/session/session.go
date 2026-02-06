@@ -143,7 +143,7 @@ func (s *Session) loadOfflineMessages() {
 		return
 	}
 	for _, msg := range messages {
-		pushMsg := model.PushMessage{Type: "offline_message", Payload: msg}
+		pushMsg := model.PushMessage{Type: model.PushTypeOfflineMessage, Payload: msg}
 		payload, err := json.Marshal(pushMsg)
 		if err != nil {
 			log.Printf("failed to marshal offline message for user %d: %v", s.UserID, err)

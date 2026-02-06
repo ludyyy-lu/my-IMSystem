@@ -6,29 +6,43 @@ import (
 	"log"
 
 	"my-IMSystem/common/common_model"
+	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/push"
 
 	"github.com/segmentio/kafka-go"
 )
 
-func StartConsumers(brokers []string, chatTopic string, friendTopic string, pushService *push.Service) {
+func StartConsumers(brokers []string, chatTopic string, friendTopic string, pushService *push.Service) context.CancelFunc {
+	ctx, cancel := context.WithCancel(context.Background())
 	if chatTopic != "" {
-		go startChatConsumer(brokers, chatTopic, pushService)
+		go startChatConsumer(ctx, brokers, chatTopic, pushService)
 	}
 	if friendTopic != "" {
-		go startFriendConsumer(brokers, friendTopic, pushService)
+		go startFriendConsumer(ctx, brokers, friendTopic, pushService)
 	}
+	return cancel
 }
 
-func startChatConsumer(brokers []string, topic string, pushService *push.Service) {
+func startChatConsumer(ctx context.Context, brokers []string, topic string, pushService *push.Service) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: brokers,
 		Topic:   topic,
 		GroupID: "ws-gateway-chat-group",
 	})
+	defer reader.Close()
+
 	for {
-		m, err := reader.ReadMessage(context.Background())
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		m, err := reader.ReadMessage(ctx)
 		if err != nil {
+			if ctx.Err() != nil {
+				return
+			}
 			log.Printf("Kafka read error (chat): %v", err)
 			continue
 		}
@@ -40,20 +54,31 @@ func startChatConsumer(brokers []string, topic string, pushService *push.Service
 		}
 
 		if pushService != nil {
-			pushService.PushToUser(msg.ToUserId, "chat_message", msg)
+			pushService.PushToUser(msg.ToUserId, model.PushTypeChatMessage, msg)
 		}
 	}
 }
 
-func startFriendConsumer(brokers []string, topic string, pushService *push.Service) {
+func startFriendConsumer(ctx context.Context, brokers []string, topic string, pushService *push.Service) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: brokers,
 		Topic:   topic,
 		GroupID: "ws-gateway-friend-group",
 	})
+	defer reader.Close()
+
 	for {
-		m, err := reader.ReadMessage(context.Background())
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		m, err := reader.ReadMessage(ctx)
 		if err != nil {
+			if ctx.Err() != nil {
+				return
+			}
 			log.Printf("Kafka read error: %v", err)
 			continue
 		}
@@ -65,7 +90,7 @@ func startFriendConsumer(brokers []string, topic string, pushService *push.Servi
 		}
 		log.Printf("[FriendEvent] %+v", event)
 		if pushService != nil {
-			pushService.PushToUser(event.ToUser, "friend_event", event)
+			pushService.PushToUser(event.ToUser, model.PushTypeFriendEvent, event)
 		}
 	}
 }

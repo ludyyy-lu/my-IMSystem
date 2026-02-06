@@ -21,7 +21,10 @@ func (d *Dispatcher) DispatchToUser(userID int64, data []byte) error {
 	return d.manager.SendTo(userID, data)
 }
 
-func (d *Dispatcher) DispatchToDevice(userID int64, _ string, data []byte) error {
+func (d *Dispatcher) DispatchToDevice(userID int64, device string, data []byte) error {
+	if device == "" {
+		return d.DispatchToUser(userID, data)
+	}
 	return d.DispatchToUser(userID, data)
 }
 
