@@ -111,8 +111,9 @@ func newTestSvcCtx(validToken string, userID int64) *svc.ServiceContext {
 		Config:         config.Config{},
 		SessionManager: mgr,
 		OfflineStore:   nil,
+		PresenceStore:  nil,
 		AuthService:    rpc.NewAuthService(&mockAuthClient{validToken: validToken, userID: userID}),
-		PushService:    push.NewService(mgr),
+		PushService:    push.NewService(mgr, nil),
 		ChatRpc:        nil,
 	}
 }
