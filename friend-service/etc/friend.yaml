@@ -1,5 +1,5 @@
 Name: friend.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 0.0.0.0:8082
 Etcd:
   Hosts:
   - 127.0.0.1:2379
@@ -10,5 +10,5 @@ Mysql:
 
 Kafka:
   Brokers:
-    - kafka:9092
+    - localhost:9094
   Topic: im-friend-topic # 好友相关事件（添加好友、删除好友等）

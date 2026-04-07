@@ -1,0 +1,28 @@
+Name: ws-gateway
+Host: 0.0.0.0
+Port: 8888
+
+Redis:
+  Addr: localhost:6379
+  Password: ""
+  DB: 0
+
+Kafka:
+  Brokers:
+    - localhost:9094
+  Topic: im-chat-topic
+  FriendTopic: im-friend-topic
+  ## 聊天消息（文字、图片、撤回等）
+
+ChatRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: message.rpc
+  Timeout: 3000
+
+AuthRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: auth.rpc

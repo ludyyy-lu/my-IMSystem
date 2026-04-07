@@ -5,16 +5,15 @@ import (
 	"fmt"
 
 	"my-IMSystem/ws-gateway/internal/config"
-	"my-IMSystem/ws-gateway/internal/conn"
-	"my-IMSystem/ws-gateway/internal/handler"
-	"my-IMSystem/ws-gateway/internal/kafka"
+	"my-IMSystem/ws-gateway/internal/consume"
 	"my-IMSystem/ws-gateway/internal/svc"
+	"my-IMSystem/ws-gateway/internal/transport"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/ws-api.yaml", "the config file")
+var configFile = flag.String("f", "etc/ws.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -24,14 +23,11 @@ func main() {
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
-	// 初始化连接池
-	conn.InitGlobalConnManager()
 
 	ctx := svc.NewServiceContext(c)
-	// 启动好友事件消费者
-	go kafka.StartFriendConsumer(c.Kafka.Brokers, "im-friend-topic")
-	go kafka.StartChatConsumer(c.Kafka.Brokers, "im-chat-topic")
-	handler.RegisterHandlers(server, ctx)
+	stopConsumers := consume.StartConsumers(c.Kafka.Brokers, c.Kafka.Topic, c.Kafka.FriendTopic, ctx.PushService)
+	defer stopConsumers()
+	transport.Register(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
