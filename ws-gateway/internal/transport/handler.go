@@ -104,9 +104,9 @@ func deliverOfflineMessages(userID int64, svcCtx *svc.ServiceContext, sess *sess
 		logx.Errorf("failed to load offline messages for user %d: %v", userID, err)
 		return
 	}
-	for _, data := range messages {
+	for i, data := range messages {
 		if err := sess.Send(data); err != nil {
-			logx.Errorf("failed to deliver offline message to user %d: %v", userID, err)
+			logx.Errorf("failed to deliver offline message %d/%d to user %d: %v", i+1, len(messages), userID, err)
 		}
 	}
 	if len(messages) > 0 {

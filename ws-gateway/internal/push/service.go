@@ -37,7 +37,7 @@ func (s *Service) PushToUser(userID int64, messageType string, payload interface
 		return
 	}
 	if err := s.manager.SendTo(userID, data); err != nil {
-		log.Printf("push delivery failed for user %d (type=%s): %v – buffering offline message", userID, messageType, err)
+		log.Printf("push delivery failed for user %d (type=%s): %v - buffering offline message", userID, messageType, err)
 		if s.offlineStore != nil {
 			if saveErr := s.offlineStore.Save(userID, data); saveErr != nil {
 				log.Printf("failed to save offline message for user %d: %v", userID, saveErr)
