@@ -25,12 +25,7 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
-	// 启动好友事件消费者
-	friendTopic := c.Kafka.FriendTopic
-	if friendTopic == "" {
-		friendTopic = "im-friend-topic"
-	}
-	stopConsumers := consume.StartConsumers(c.Kafka.Brokers, c.Kafka.Topic, friendTopic, ctx.PushService)
+	stopConsumers := consume.StartConsumers(c.Kafka.Brokers, c.Kafka.Topic, c.Kafka.FriendTopic, ctx.PushService)
 	defer stopConsumers()
 	transport.Register(server, ctx)
 

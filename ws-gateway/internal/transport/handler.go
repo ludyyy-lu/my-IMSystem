@@ -1,14 +1,17 @@
+// Package transport handles the HTTP→WebSocket upgrade and authentication.
+// Once a connection is established it registers the session with the session
+// manager, starts the session I/O goroutines, and asynchronously delivers any
+// pending offline messages.  Inbound message routing is delegated to the
+// router package; this package contains no business logic.
 package transport
 
 import (
-	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
-	"my-IMSystem/chat-service/chat"
-	"my-IMSystem/common/kafka"
 	"my-IMSystem/ws-gateway/internal/model"
+	"my-IMSystem/ws-gateway/internal/router"
 	"my-IMSystem/ws-gateway/internal/session"
 	"my-IMSystem/ws-gateway/internal/svc"
 
@@ -18,10 +21,12 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // 允许所有跨域，后面可以做限制
+		return true // allow all origins; restrict in production if needed
 	},
 }
 
+// ConnectHandler returns an http.HandlerFunc that upgrades the request to a
+// WebSocket connection after verifying the bearer token.
 func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, protocolToken := extractToken(r)
@@ -35,7 +40,7 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		userId, err := svcCtx.AuthService.VerifyToken(r.Context(), token)
+		userID, err := svcCtx.AuthService.VerifyToken(r.Context(), token)
 		if err != nil {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
@@ -47,79 +52,63 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		conn, err := upgrader.Upgrade(w, r, responseHeader)
 		if err != nil {
-			http.Error(w, "failed to upgrade to WebSocket", http.StatusInternalServerError)
+			logx.Errorf("WebSocket upgrade failed for user %d: %v", userID, err)
 			return
 		}
 
-		onMessage := func(userID int64, payload []byte) {
-			handleMessage(svcCtx, userID, payload)
+		onMessage := func(uid int64, payload []byte) {
+			router.HandleMessage(svcCtx, uid, payload)
 		}
-		onClose := func(userID int64) {
-			logx.Infof("WebSocket connection closed for user ID: %d", userID)
+		onClose := func(uid int64) {
+			svcCtx.SessionManager.Remove(uid)
+			logx.Infof("WebSocket connection closed for user %d", uid)
 		}
 
-		sess := session.NewSession(userId, conn, svcCtx.SessionManager, svcCtx.OfflineStore, onMessage, onClose)
+		sess := session.NewSession(userID, conn, onMessage, onClose)
+		svcCtx.SessionManager.Add(sess)
 		sess.Start()
-		logx.Infof("WebSocket connection established for user ID: %d", userId)
+		go deliverOfflineMessages(userID, svcCtx, sess)
+
+		logx.Infof("WebSocket connection established for user %d", userID)
 	}
 }
 
-func extractToken(r *http.Request) (string, string) {
-	token := r.Header.Get("Authorization")
+// deliverOfflineMessages loads any pending messages from the offline store and
+// pushes them to the newly connected session.
+func deliverOfflineMessages(userID int64, svcCtx *svc.ServiceContext, sess *session.Session) {
+	if svcCtx.OfflineStore == nil {
+		return
+	}
+	messages, err := svcCtx.OfflineStore.LoadAndDelete(userID)
+	if err != nil {
+		logx.Errorf("failed to load offline messages for user %d: %v", userID, err)
+		return
+	}
+	for _, msg := range messages {
+		payload, err := json.Marshal(model.PushMessage{
+			Type:    model.PushTypeOfflineMessage,
+			Payload: msg,
+		})
+		if err != nil {
+			logx.Errorf("failed to marshal offline message for user %d: %v", userID, err)
+			continue
+		}
+		_ = sess.Send(payload)
+	}
+}
+
+// extractToken reads the bearer token from Authorization header, query string,
+// or Sec-WebSocket-Protocol header (in that priority order).
+// It also returns the raw Sec-WebSocket-Protocol value so it can be echoed back
+// to satisfy browser WebSocket clients that use the protocol field for auth.
+func extractToken(r *http.Request) (token, protocolToken string) {
+	token = r.Header.Get("Authorization")
 	if token == "" {
 		token = r.URL.Query().Get("token")
 	}
-	protocolToken := r.Header.Get("Sec-WebSocket-Protocol")
+	protocolToken = r.Header.Get("Sec-WebSocket-Protocol")
 	if token == "" {
 		token = protocolToken
 	}
 	return strings.TrimPrefix(token, "Bearer "), protocolToken
-}
-
-func handleMessage(svcCtx *svc.ServiceContext, userId int64, payload []byte) {
-	msg, err := ParseMessage(payload)
-	if err != nil {
-		logx.Errorf("invalid message from user %d: %v", userId, err)
-		return
-	}
-
-	switch msg.Type {
-	case "chat":
-		handleChatMessage(svcCtx, userId, msg)
-	case "ack":
-		handleAckMessage(svcCtx, userId, msg)
-	default:
-		logx.Errorf("unknown message type: %s", msg.Type)
-	}
-}
-
-func handleChatMessage(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
-	msg.From = fromUserID
-	if svcCtx.Config.Kafka.Topic == "" {
-		logx.Error("Kafka topic is not configured")
-		return
-	}
-	if err := kafka.SendMessage(svcCtx.Config.Kafka.Topic, msg); err != nil {
-		logx.Errorf("failed to send message to Kafka: %v", err)
-	}
-}
-
-func handleAckMessage(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	if svcCtx.ChatRpc == nil {
-		logx.Error("chat rpc client not initialized")
-		return
-	}
-
-	resp, err := svcCtx.ChatRpc.AckMessage(ctx, &chat.AckMessageReq{
-		MessageId: msg.Content,
-		UserId:    fromUserID,
-	})
-	if err != nil {
-		logx.Errorf("failed to send ACK to chat-service: %v", err)
-		return
-	}
-	logx.Infof("ACK sent for message %s from user %d | resp: %+v", msg.Content, fromUserID, resp)
 }
