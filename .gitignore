@@ -12,3 +12,7 @@ deploy/redis/data/
 *.tmp
 *.sock
 *.mod
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

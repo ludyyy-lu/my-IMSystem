@@ -1,0 +1,33 @@
+Name: api-gateway
+Host: 0.0.0.0
+Port: 8090
+
+JwtSecret: my-secret-key
+
+AuthRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: auth.rpc
+  Timeout: 3000
+
+UserRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+  Timeout: 3000
+
+FriendRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: friend.rpc
+  Timeout: 3000
+
+ChatRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: message.rpc
+  Timeout: 3000
