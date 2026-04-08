@@ -62,3 +62,30 @@ services:
     depends_on:
       - zookeeper
     restart: always
+
+  # HTTP REST API gateway — bridges browser/frontend ↔ gRPC microservices
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api-gateway
+    container_name: im-api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - etcd
+      - mysql
+      - redis
+    restart: always
+
+  # React frontend served by nginx
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: im-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    restart: always
+
