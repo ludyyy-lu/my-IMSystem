@@ -48,3 +48,18 @@ func (m *Manager) Broadcast(data []byte) {
 		_ = sess.Send(data)
 	}
 }
+
+// IsOnline reports whether the user has an active session registered with
+// this Manager.  It reflects in-process state only; for cross-node presence
+// awareness use a PresenceStore backed by Redis.
+func (m *Manager) IsOnline(userID int64) bool {
+	_, ok := m.Get(userID)
+	return ok
+}
+
+// Count returns the number of currently registered sessions.
+func (m *Manager) Count() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return len(m.sessions)
+}

@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -28,6 +29,36 @@ import (
 
 var pushTestUpgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true },
+}
+
+// mockOfflineStore is a thread-safe in-memory OfflineStore for tests.
+type mockOfflineStore struct {
+	mu   sync.Mutex
+	msgs map[int64][][]byte
+}
+
+func (m *mockOfflineStore) Save(userID int64, data []byte) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.msgs == nil {
+		m.msgs = make(map[int64][][]byte)
+	}
+	m.msgs[userID] = append(m.msgs[userID], data)
+	return nil
+}
+
+func (m *mockOfflineStore) LoadAndDelete(userID int64) ([][]byte, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	msgs := m.msgs[userID]
+	delete(m.msgs, userID)
+	return msgs, nil
+}
+
+func (m *mockOfflineStore) get(userID int64) [][]byte {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.msgs[userID]
 }
 
 // makePushWSPair 创建一对测试用 WebSocket 连接，供 push 包测试使用。
@@ -60,7 +91,7 @@ func makePushWSPair(t *testing.T) (serverConn, clientConn *websocket.Conn) {
 //  3. payload 字段不为空（原始数据被保留）。
 func TestPushService_PushToUser(t *testing.T) {
 	mgr := session.NewManager()
-	svc := push.NewService(mgr)
+	svc := push.NewService(mgr, nil)
 
 	serverConn, clientConn := makePushWSPair(t)
 	t.Cleanup(func() { clientConn.Close() })
@@ -93,19 +124,41 @@ func TestPushService_PushToUser(t *testing.T) {
 }
 
 // TestPushService_PushToUser_Offline 验证对离线（无 session）的用户调用 PushToUser
-// 不会 panic，仅记录日志后静默返回。
+// 不会 panic，仅记录日志后静默返回（无 OfflineStore 时）。
 func TestPushService_PushToUser_Offline(t *testing.T) {
 	mgr := session.NewManager()
-	svc := push.NewService(mgr)
+	svc := push.NewService(mgr, nil)
 	// 用户 999 没有在线 session，PushToUser 应静默失败，不 panic
 	svc.PushToUser(999, model.PushTypeChatMessage, "some data")
+}
+
+// TestPushService_PushToUser_OfflineStore 验证当用户离线时，消息被正确保存到 OfflineStore。
+func TestPushService_PushToUser_OfflineStore(t *testing.T) {
+	mgr := session.NewManager()
+	store := &mockOfflineStore{}
+	svc := push.NewService(mgr, store)
+
+	// 用户 888 离线，PushToUser 应将消息存入 OfflineStore
+	svc.PushToUser(888, model.PushTypeChatMessage, map[string]string{"text": "offline msg"})
+
+	saved := store.get(888)
+	if len(saved) != 1 {
+		t.Fatalf("expected 1 saved message, got %d", len(saved))
+	}
+	var pm model.PushMessage
+	if err := json.Unmarshal(saved[0], &pm); err != nil {
+		t.Fatalf("unmarshal saved message: %v", err)
+	}
+	if pm.Type != model.PushTypeChatMessage {
+		t.Errorf("saved type = %q, want %q", pm.Type, model.PushTypeChatMessage)
+	}
 }
 
 // TestPushService_Broadcast 验证 Broadcast 将同一条消息广播到所有在线用户，
 // 且每个客户端收到的 type 字段均正确。
 func TestPushService_Broadcast(t *testing.T) {
 	mgr := session.NewManager()
-	svc := push.NewService(mgr)
+	svc := push.NewService(mgr, nil)
 
 	type entry struct {
 		client *websocket.Conn

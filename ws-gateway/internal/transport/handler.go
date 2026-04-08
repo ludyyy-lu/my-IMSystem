@@ -1,16 +1,21 @@
 // Package transport handles the HTTP→WebSocket upgrade and authentication.
-// Once a connection is established it registers the session with the session
-// manager, starts the session I/O goroutines, and asynchronously delivers any
-// pending offline messages.  Inbound message routing is delegated to the
-// router package; this package contains no business logic.
+// Once a connection is established it:
+//   - verifies the bearer token via AuthService,
+//   - marks the user online in the PresenceStore,
+//   - registers the session with the SessionManager,
+//   - starts session I/O goroutines,
+//   - asynchronously delivers any pending offline messages.
+//
+// On connection close the user is marked offline and the session is removed
+// from the SessionManager.  Inbound message routing is delegated to the router
+// package; this file contains no business logic.
 package transport
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 	"strings"
 
-	"my-IMSystem/ws-gateway/internal/model"
 	"my-IMSystem/ws-gateway/internal/router"
 	"my-IMSystem/ws-gateway/internal/session"
 	"my-IMSystem/ws-gateway/internal/svc"
@@ -56,11 +61,25 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		// Mark the user online in the shared presence store so that other
+		// gateway nodes and downstream services can observe their status.
+		if svcCtx.PresenceStore != nil {
+			if pErr := svcCtx.PresenceStore.SetOnline(context.Background(), userID); pErr != nil {
+				logx.Errorf("failed to set online presence for user %d: %v", userID, pErr)
+			}
+		}
+
 		onMessage := func(uid int64, payload []byte) {
 			router.HandleMessage(svcCtx, uid, payload)
 		}
 		onClose := func(uid int64) {
 			svcCtx.SessionManager.Remove(uid)
+			// Mark the user offline when their WebSocket connection is closed.
+			if svcCtx.PresenceStore != nil {
+				if pErr := svcCtx.PresenceStore.SetOffline(context.Background(), uid); pErr != nil {
+					logx.Errorf("failed to clear online presence for user %d: %v", uid, pErr)
+				}
+			}
 			logx.Infof("WebSocket connection closed for user %d", uid)
 		}
 
@@ -74,7 +93,8 @@ func ConnectHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 }
 
 // deliverOfflineMessages loads any pending messages from the offline store and
-// pushes them to the newly connected session.
+// pushes them directly to the newly connected session.  Each stored entry is
+// already a serialised PushMessage envelope, so no re-serialisation is needed.
 func deliverOfflineMessages(userID int64, svcCtx *svc.ServiceContext, sess *session.Session) {
 	if svcCtx.OfflineStore == nil {
 		return
@@ -84,16 +104,13 @@ func deliverOfflineMessages(userID int64, svcCtx *svc.ServiceContext, sess *sess
 		logx.Errorf("failed to load offline messages for user %d: %v", userID, err)
 		return
 	}
-	for _, msg := range messages {
-		payload, err := json.Marshal(model.PushMessage{
-			Type:    model.PushTypeOfflineMessage,
-			Payload: msg,
-		})
-		if err != nil {
-			logx.Errorf("failed to marshal offline message for user %d: %v", userID, err)
-			continue
+	for i, data := range messages {
+		if err := sess.Send(data); err != nil {
+			logx.Errorf("failed to deliver offline message %d/%d to user %d: %v", i+1, len(messages), userID, err)
 		}
-		_ = sess.Send(payload)
+	}
+	if len(messages) > 0 {
+		logx.Infof("delivered %d offline message(s) to user %d", len(messages), userID)
 	}
 }
 

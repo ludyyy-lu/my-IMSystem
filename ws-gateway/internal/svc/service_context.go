@@ -16,7 +16,8 @@ import (
 type ServiceContext struct {
 	Config         config.Config
 	SessionManager *session.Manager
-	OfflineStore   *session.RedisOfflineMsgStore
+	OfflineStore   session.OfflineStore
+	PresenceStore  session.PresenceStore
 	RedisClient    *redis.Client
 	ChatRpc        chat.ChatClient
 	AuthService    *rpc.AuthService
@@ -34,6 +35,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	sessionManager := session.NewManager()
 	offlineStore := session.NewRedisOfflineMsgStore(rdb)
+	presenceStore := session.NewRedisPresenceStore(rdb)
 	chatClient := chat.NewChatClient(zrpc.MustNewClient(c.ChatRpcConf).Conn())
 	authClient := auth.NewAuthClient(zrpc.MustNewClient(c.AuthRpcConf).Conn())
 
@@ -41,9 +43,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:         c,
 		SessionManager: sessionManager,
 		OfflineStore:   offlineStore,
+		PresenceStore:  presenceStore,
 		RedisClient:    rdb,
 		ChatRpc:        chatClient,
 		AuthService:    rpc.NewAuthService(authClient),
-		PushService:    push.NewService(sessionManager),
+		PushService:    push.NewService(sessionManager, offlineStore),
 	}
 }
