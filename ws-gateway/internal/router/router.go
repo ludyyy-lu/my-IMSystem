@@ -1,67 +1,128 @@
 // Package router dispatches inbound WebSocket messages to the appropriate
 // business-logic handler based on message type.
-// It sits between the transport layer (which handles raw WebSocket I/O) and
-// the downstream services (Kafka, chat RPC).
 package router
 
 import (
-	"context"
-	"encoding/json"
-	"time"
+"context"
+"encoding/json"
+"time"
 
-	"my-IMSystem/chat-service/chat"
-	"my-IMSystem/common/kafka"
-	"my-IMSystem/ws-gateway/internal/model"
-	"my-IMSystem/ws-gateway/internal/svc"
+"my-IMSystem/chat-service/chat"
+"my-IMSystem/common/kafka"
+"my-IMSystem/ws-gateway/internal/model"
+"my-IMSystem/ws-gateway/internal/svc"
 
-	"github.com/zeromicro/go-zero/core/logx"
+"github.com/zeromicro/go-zero/core/logx"
 )
 
 // HandleMessage parses payload and dispatches to the correct handler.
 func HandleMessage(svcCtx *svc.ServiceContext, userID int64, payload []byte) {
-	var msg model.WsMessage
-	if err := json.Unmarshal(payload, &msg); err != nil {
-		logx.Errorf("invalid message from user %d: %v", userID, err)
-		return
-	}
-
-	switch msg.Type {
-	case "chat":
-		handleChat(svcCtx, userID, msg)
-	case "ack":
-		handleAck(svcCtx, userID, msg)
-	default:
-		logx.Errorf("unknown message type from user %d: %s", userID, msg.Type)
-	}
+var msg model.WsMessage
+if err := json.Unmarshal(payload, &msg); err != nil {
+logx.Errorf("invalid message from user %d: %v", userID, err)
+return
+}
+switch msg.Type {
+case "chat":
+handleChat(svcCtx, userID, msg)
+case "ack":
+handleAck(svcCtx, userID, msg)
+case "batch_ack":
+handleBatchAck(svcCtx, userID, msg)
+default:
+logx.Errorf("unknown message type from user %d: %s", userID, msg.Type)
+}
 }
 
 // handleChat forwards a chat message to Kafka for async processing by chat-service.
 func handleChat(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
-	msg.From = fromUserID
-	if svcCtx.Config.Kafka.Topic == "" {
-		logx.Error("Kafka chat topic is not configured")
-		return
-	}
-	if err := kafka.SendMessage(svcCtx.Config.Kafka.Topic, msg); err != nil {
-		logx.Errorf("failed to enqueue chat message to Kafka: %v", err)
-	}
+msg.From = fromUserID
+if svcCtx.Config.Kafka.Topic == "" {
+logx.Error("Kafka chat topic is not configured")
+return
+}
+if err := kafka.SendMessage(svcCtx.Config.Kafka.Topic, msg); err != nil {
+logx.Errorf("failed to enqueue chat message to Kafka: %v", err)
+}
 }
 
-// handleAck acknowledges a delivered message via the chat RPC service.
+// handleAck acknowledges a single message via the chat RPC service, then pushes
+// an ack_result confirmation back to the requesting user.
 func handleAck(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
-	if svcCtx.ChatRpc == nil {
-		logx.Error("chat RPC client not initialized")
-		return
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+if svcCtx.ChatRpc == nil {
+logx.Error("chat RPC client not initialized")
+return
+}
+// MessageId field takes precedence; fall back to Content for backward compatibility.
+messageID := msg.MessageId
+if messageID == "" {
+messageID = msg.Content
+}
+if messageID == "" {
+logx.Errorf("ack from user %d: missing message_id", fromUserID)
+return
+}
 
-	if _, err := svcCtx.ChatRpc.AckMessage(ctx, &chat.AckMessageReq{
-		MessageId: msg.Content,
-		UserId:    fromUserID,
-	}); err != nil {
-		logx.Errorf("failed to ACK message %s from user %d: %v", msg.Content, fromUserID, err)
-		return
-	}
-	logx.Infof("ACK sent for message %s from user %d", msg.Content, fromUserID)
+ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+defer cancel()
+
+resp, err := svcCtx.ChatRpc.AckMessage(ctx, &chat.AckMessageReq{
+MessageId: messageID,
+UserId:    fromUserID,
+})
+
+success := err == nil && resp != nil && resp.Status == "OK"
+if err != nil {
+logx.Errorf("failed to ACK message %s from user %d: %v", messageID, fromUserID, err)
+} else {
+logx.Infof("ACK sent for message %s from user %d", messageID, fromUserID)
+}
+
+// 将 ack 结果推送回客户端
+if svcCtx.PushService != nil {
+svcCtx.PushService.PushToUser(fromUserID, model.PushTypeAckResult, map[string]interface{}{
+"message_id": messageID,
+"success":    success,
+})
+}
+}
+
+// handleBatchAck marks all messages in a conversation as read, then pushes a
+// batch_ack_result back to the requesting user.
+func handleBatchAck(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
+if svcCtx.ChatRpc == nil {
+logx.Error("chat RPC client not initialized")
+return
+}
+if msg.PeerId == 0 {
+logx.Errorf("batch_ack from user %d: missing peer_id", fromUserID)
+return
+}
+
+ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer cancel()
+
+resp, err := svcCtx.ChatRpc.BatchAckMessages(ctx, &chat.BatchAckReq{
+UserId: fromUserID,
+PeerId: msg.PeerId,
+})
+
+success := err == nil && resp != nil && resp.Status == "OK"
+var ackedCount int64
+if resp != nil {
+ackedCount = resp.AckedCount
+}
+if err != nil {
+logx.Errorf("batch_ack failed user=%d peer=%d: %v", fromUserID, msg.PeerId, err)
+} else {
+logx.Infof("batch_ack done user=%d peer=%d acked=%d", fromUserID, msg.PeerId, ackedCount)
+}
+
+if svcCtx.PushService != nil {
+svcCtx.PushService.PushToUser(fromUserID, model.PushTypeBatchAckResult, map[string]interface{}{
+"peer_id":     msg.PeerId,
+"success":     success,
+"acked_count": ackedCount,
+})
+}
 }

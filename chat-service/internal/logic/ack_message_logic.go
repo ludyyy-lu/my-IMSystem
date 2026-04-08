@@ -1,46 +1,59 @@
 package logic
 
 import (
-	"context"
+"context"
+"time"
 
-	chat_chat "my-IMSystem/chat-service/chat"
-	"my-IMSystem/chat-service/internal/model"
-	"my-IMSystem/chat-service/internal/svc"
+chat_chat "my-IMSystem/chat-service/chat"
+"my-IMSystem/chat-service/internal/model"
+"my-IMSystem/chat-service/internal/svc"
+"my-IMSystem/common/common_model"
 
-	"github.com/zeromicro/go-zero/core/logx"
+"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AckMessageLogic struct {
-	ctx    context.Context
-	svcCtx *svc.ServiceContext
-	logx.Logger
+ctx    context.Context
+svcCtx *svc.ServiceContext
+logx.Logger
 }
 
 func NewAckMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AckMessageLogic {
-	return &AckMessageLogic{
-		ctx:    ctx,
-		svcCtx: svcCtx,
-		Logger: logx.WithContext(ctx),
-	}
+return &AckMessageLogic{
+ctx:    ctx,
+svcCtx: svcCtx,
+Logger: logx.WithContext(ctx),
+}
 }
 
-// AckMessage 处理消息回执逻辑
-// 1. 接收消息 ID 和用户 ID
-// 2. 调用 model 层函数更新消息状态为已读
-// 3. 返回处理结果
-// 注意：这里的逻辑是同步的，可能会影响性能，实际应用中可以考虑异步处理或使用消息队列
+// AckMessage 将单条消息标记为已读，并向 Kafka 发布已读回执事件通知消息发送方。
+//
+// 流程：
+//  1. 调用 model.MarkMessageAsReadAndGet 更新 DB 消息状态（幂等）。
+//  2. 若配置了 ReadReceiptTopic，向 Kafka 发布 ReadReceiptEvent。
 func (l *AckMessageLogic) AckMessage(in *chat_chat.AckMessageReq) (*chat_chat.AckMessageResp, error) {
-	// todo: add your logic here and delete this line
-	err := model.MarkMessageAsRead(l.svcCtx.DB, in.MessageId, in.UserId)
-	if err != nil {
-		l.Logger.Errorf("Ack failed: %v", err)
-		return &chat_chat.AckMessageResp{
-			Status: "FAILED",
-		}, nil
-	}
+if in.MessageId == "" {
+return &chat_chat.AckMessageResp{Status: "FAILED"}, nil
+}
 
-	return &chat_chat.AckMessageResp{
-		Status: "OK",
-	}, nil
-	// return &chat_chat.AckMessageResp{}, nil
+msg, err := model.MarkMessageAsReadAndGet(l.svcCtx.DB, in.MessageId, in.UserId)
+if err != nil {
+l.Logger.Errorf("AckMessage: mark failed msgID=%s userID=%d err=%v", in.MessageId, in.UserId, err)
+return &chat_chat.AckMessageResp{Status: "FAILED"}, nil
+}
+
+// 发布已读回执事件（异步通知发送方，失败不影响主流程）
+if l.svcCtx.ReadReceiptProducer != nil && msg != nil {
+event := common_model.ReadReceiptEvent{
+MessageId: in.MessageId,
+SenderId:  msg.FromUserId,
+ReaderId:  in.UserId,
+ReadAt:    time.Now().UnixMilli(),
+}
+if pubErr := l.svcCtx.ReadReceiptProducer.SendMessage(in.MessageId, event); pubErr != nil {
+l.Logger.Errorf("AckMessage: publish read receipt failed msgID=%s err=%v", in.MessageId, pubErr)
+}
+}
+
+return &chat_chat.AckMessageResp{Status: "OK"}, nil
 }
