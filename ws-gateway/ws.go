@@ -25,7 +25,7 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
-	stopConsumers := consume.StartConsumers(c.Kafka.Brokers, c.Kafka.Topic, c.Kafka.FriendTopic, ctx.PushService)
+	stopConsumers := consume.StartConsumers(c.Kafka.Brokers, c.Kafka.Topic, c.Kafka.FriendTopic, c.Kafka.ReadReceiptTopic, ctx.PushService)
 	defer stopConsumers()
 	transport.Register(server, ctx)
 

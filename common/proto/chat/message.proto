@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-// 这对吗
 package chat;
 option go_package = "./chat;chat";
 
@@ -9,8 +8,8 @@ message ChatMessage {
   int64 to_user_id = 2;
   string content = 3;
   int64 timestamp = 4;
-  string message_id = 5; // 可选，用于去重/ack
-  bool is_read = 6; // 是否已读
+  string message_id = 5; // 消息唯一ID，用于去重/ack
+  bool is_read = 6;       // 是否已读
 }
 
 message SendMessageReq {
@@ -26,9 +25,9 @@ message SendMessageResp {
 }
 
 message GetChatHistoryReq {
-  int64 user_id = 1;        // 当前用户
-  int64 peer_id = 2;        // 对方用户
-  int64 limit = 3;          // 查询条数
+  int64 user_id = 1;          // 当前用户
+  int64 peer_id = 2;          // 对方用户
+  int64 limit = 3;            // 查询条数
   int64 before_timestamp = 4; // 用于分页（查询某时间戳前的消息）
 }
 
@@ -36,19 +35,49 @@ message GetChatHistoryResp {
   repeated ChatMessage messages = 1;
 }
 
+// 单条消息已读回执
 message AckMessageReq {
-  string message_id = 1;
-  int64 user_id = 2;
+  string message_id = 1; // 要标记为已读的消息 ID
+  int64 user_id = 2;     // 执行已读操作的用户（消息接收方）
 }
 
 message AckMessageResp {
-  string status = 1;
+  string status = 1; // OK / FAILED
+}
+
+// 批量将某会话中所有未读消息标记为已读
+message BatchAckReq {
+  int64 user_id = 1; // 执行已读操作的用户（消息接收方）
+  int64 peer_id = 2; // 消息发送方（会话对端）
+}
+
+message BatchAckResp {
+  string status = 1;      // OK / FAILED
+  int64 acked_count = 2;  // 实际标记为已读的消息数
+}
+
+// 查询当前用户的未读消息统计
+message GetUnreadCountReq {
+  int64 user_id = 1;
+}
+
+message UnreadConversation {
+  int64 peer_id        = 1; // 对端用户 ID
+  int64 unread_count   = 2; // 未读消息数
+  string last_content  = 3; // 最近一条未读消息内容（预览）
+  int64 last_timestamp = 4; // 最近一条未读消息的时间戳（毫秒）
+}
+
+message GetUnreadCountResp {
+  int64 total_unread                     = 1;
+  repeated UnreadConversation conversations = 2;
 }
 
 // ======== Service 定义 ========
-// 包叫什么 service叫什么名字 省得后来麻烦
 service Chat {
   rpc SendMessage(SendMessageReq) returns (SendMessageResp);
   rpc GetChatHistory(GetChatHistoryReq) returns (GetChatHistoryResp);
   rpc AckMessage(AckMessageReq) returns (AckMessageResp);
+  rpc BatchAckMessages(BatchAckReq) returns (BatchAckResp);
+  rpc GetUnreadCount(GetUnreadCountReq) returns (GetUnreadCountResp);
 }
