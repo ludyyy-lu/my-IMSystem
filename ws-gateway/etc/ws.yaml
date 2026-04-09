@@ -12,6 +12,7 @@ Kafka:
     - localhost:9094
   Topic: im-chat-topic
   FriendTopic: im-friend-topic
+  ReadReceiptTopic: ""
   ## 聊天消息（文字、图片、撤回等）
 
 ChatRpcConf:

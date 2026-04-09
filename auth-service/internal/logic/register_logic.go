@@ -50,18 +50,19 @@ func (l *RegisterLogic) Register(in *auth_auth.RegisterReq) (*auth_auth.Register
 	user := model.User{
 		Username: in.Username,
 		Password: hashedPwd,
+		Nickname: in.Username,
 	}
 	if err := db.Create(&user).Error; err != nil {
 		return nil, err
 	}
 
 	// 4. 生成 token
-	accessToken, err := jwt.GenerateToken(user.ID, "",l.svcCtx.Config.JwtAuth.AccessSecret)
+	accessToken, err := jwt.GenerateToken(user.ID, "", l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user.ID, "",l.svcCtx.Config.JwtAuth.AccessSecret)
+	refreshToken, err := jwt.GenerateRefreshToken(user.ID, "", l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err
 	}

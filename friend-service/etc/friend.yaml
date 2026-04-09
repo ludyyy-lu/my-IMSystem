@@ -6,7 +6,7 @@ Etcd:
   Key: friend.rpc
   
 Mysql:
-  DataSource: imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: goxygen:pass@tcp(localhost:3308)/im?charset=utf8mb4&parseTime=True&loc=Local
 
 Kafka:
   Brokers:

@@ -162,6 +162,13 @@
   overflow-y: auto;
 }
 
+.loading-state {
+  padding: 20px;
+  color: #8a8a8a;
+  font-size: 13px;
+  text-align: center;
+}
+
 .friend-item {
   display: flex;
   align-items: center;
@@ -436,4 +443,56 @@
 
 .empty-state p {
   font-size: 15px;
+}
+
+.bootstrap-state {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f6f8ff 0%, #eef3ff 100%);
+  padding: 24px;
+}
+
+.bootstrap-card {
+  width: min(520px, 100%);
+  background: #fff;
+  border: 1px solid #e8ecff;
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(56, 86, 160, 0.14);
+  padding: 28px;
+  color: #24324b;
+}
+
+.bootstrap-card h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.bootstrap-card p {
+  color: #6a768a;
+  margin-bottom: 12px;
+}
+
+.bootstrap-card pre {
+  background: #f5f7ff;
+  border-radius: 12px;
+  padding: 12px;
+  overflow: auto;
+  color: #b91c1c;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.bootstrap-card button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: #667eea;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bootstrap-card button:hover {
+  background: #5a67d8;
 }

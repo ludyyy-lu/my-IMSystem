@@ -43,12 +43,12 @@ func (l *LoginLogic) Login(in *auth_auth.LoginReq) (*auth_auth.LoginResp, error)
 	}
 
 	// 生成 token
-	accessToken, err := jwt.GenerateToken(user.ID, in.DeviceId, l.svcCtx.Config.JwtAuth.AccessSecret)
+	accessToken, err := jwt.GenerateToken(user.ID, in.DeviceId, l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user.ID, in.DeviceId, l.svcCtx.Config.JwtAuth.AccessSecret)
+	refreshToken, err := jwt.GenerateRefreshToken(user.ID, in.DeviceId, l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err
 	}

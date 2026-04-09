@@ -28,7 +28,7 @@ func NewRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Refr
 // 刷新 token（用于保持会话）
 func (l *RefreshTokenLogic) RefreshToken(in *auth_auth.RefreshTokenReq) (*auth_auth.RefreshTokenResp, error) {
 	// 1. 解析 refresh_token
-	claims, err := jwt.ParseToken(in.RefreshToken, l.svcCtx.Config.JwtAuth.AccessSecret)
+	claims, err := jwt.ParseToken(in.RefreshToken, l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err // 非法或过期 token
 	}
@@ -36,7 +36,7 @@ func (l *RefreshTokenLogic) RefreshToken(in *auth_auth.RefreshTokenReq) (*auth_a
 	// 2. 校验是否为 refresh_token（比如在 claims 里区分用途，或 Redis 判断是否还有效，以后再做）
 
 	// 3. 生成新的 access_token（仍然用 device_id）
-	accessToken, err := jwt.GenerateToken(claims.Uid, claims.DeviceId, l.svcCtx.Config.JwtAuth.AccessSecret)
+	accessToken, err := jwt.GenerateToken(claims.Uid, claims.DeviceId, l.svcCtx.JwtSecretKey)
 	if err != nil {
 		return nil, err
 	}

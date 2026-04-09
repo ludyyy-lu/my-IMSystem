@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"path"
 
 	"my-IMSystem/api-gateway/internal/middleware"
 	"my-IMSystem/api-gateway/internal/svc"
@@ -13,7 +14,7 @@ import (
 // Path parameter :id is extracted from the URL path.
 func GetProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := r.PathValue("id")
+		idStr := path.Base(r.URL.Path)
 		uid, err := parseInt64(idStr)
 		if err != nil {
 			respondJSON(w, http.StatusBadRequest, "invalid user id", nil)

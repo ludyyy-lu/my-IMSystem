@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 
 	"my-IMSystem/api-gateway/internal/middleware"
 	"my-IMSystem/api-gateway/internal/svc"
@@ -87,7 +88,7 @@ func RespondFriendRequestHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 func DeleteFriendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.GetUserID(r)
-		friendIDStr := r.PathValue("id")
+		friendIDStr := path.Base(r.URL.Path)
 		friendID, err := parseInt64(friendIDStr)
 		if err != nil {
 			respondJSON(w, http.StatusBadRequest, "invalid friend id", nil)

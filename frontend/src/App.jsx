@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { Component, useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import { api } from './api';
 
@@ -14,11 +14,41 @@ function getMyId() {
   const token = localStorage.getItem('access_token');
   if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = decodeJwtPayload(token);
     return payload.uid;
   } catch {
     return null;
   }
+}
+
+function decodeJwtPayload(token) {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64 + '='.repeat((4 - (base64.length % 4 || 4)) % 4);
+  return JSON.parse(atob(padded));
+}
+
+function hasValidAccessToken() {
+  const token = localStorage.getItem('access_token');
+  if (!token) return false;
+  try {
+    const payload = decodeJwtPayload(token);
+    if (!payload || typeof payload.exp !== 'number') return false;
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp > now;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function clearAuthTokens() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 }
 
 function formatTime(ts) {
@@ -29,6 +59,38 @@ function formatTime(ts) {
 
 function avatarChar(name) {
   return (name || '?')[0].toUpperCase();
+}
+
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error('App crashed:', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bootstrap-state error-state">
+          <div className="bootstrap-card">
+            <h2>页面加载失败</h2>
+            <p>前端发生了运行时错误，已经被拦截，避免白屏。</p>
+            <pre>{String(this.state.error?.message || this.state.error || 'Unknown error')}</pre>
+            <button type="button" onClick={() => window.location.reload()}>刷新重试</button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 // ---- Auth Page ----
@@ -159,6 +221,7 @@ function ChatApp({ onLogout }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [unread, setUnread] = useState({}); // { peer_id: count }
+  const [bootstrapped, setBootstrapped] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Handle incoming WebSocket messages
@@ -182,18 +245,42 @@ function ChatApp({ onLogout }) {
 
   // Load friends
   useEffect(() => {
-    api.getFriends().then(setFriends).catch(() => {});
-    api.getUnreadCount().then((convos) => {
-      const map = {};
-      (convos || []).forEach((c) => { map[c.peer_id] = c.unread_count; });
-      setUnread(map);
-    }).catch(() => {});
+    let cancelled = false;
+
+    Promise.all([
+      api.getFriends(),
+      api.getUnreadCount(),
+    ])
+      .then(([friendsData, unreadData]) => {
+        if (cancelled) return;
+        setFriends(normalizeArray(friendsData));
+        const map = {};
+        normalizeArray(unreadData).forEach((c) => {
+          if (c && typeof c.peer_id !== 'undefined') {
+            map[c.peer_id] = c.unread_count || 0;
+          }
+        });
+        setUnread(map);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setFriends([]);
+          setUnread({});
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBootstrapped(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Load pending requests when switching to requests tab
   useEffect(() => {
     if (tab === 'requests') {
-      api.getFriendRequests().then(setRequests).catch(() => {});
+      api.getFriendRequests().then((data) => setRequests(normalizeArray(data))).catch(() => {});
     }
   }, [tab]);
 
@@ -203,7 +290,7 @@ function ChatApp({ onLogout }) {
       if (!searchQuery.trim()) {
         setSearchResults([]);
       } else {
-        api.searchUser(searchQuery).then(setSearchResults).catch(() => {});
+          api.searchUser(searchQuery).then((data) => setSearchResults(normalizeArray(data))).catch(() => {});
       }
     }, 400);
     return () => clearTimeout(t);
@@ -213,6 +300,31 @@ function ChatApp({ onLogout }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  if (!bootstrapped) {
+    return (
+      <div className="chat-layout">
+        <div className="sidebar">
+          <div className="sidebar-header">
+            <h2>💬 IM System</h2>
+            <button className="logout-btn" onClick={handleLogout}>退出</button>
+          </div>
+          <div className="friend-list">
+            <div className="loading-state">正在加载联系人和未读消息…</div>
+          </div>
+        </div>
+
+        <div className="chat-window">
+          <div className="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#667eea" strokeWidth="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p>正在连接聊天服务…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Select friend → load history
   function selectFriend(f) {
@@ -414,9 +526,21 @@ function ChatApp({ onLogout }) {
 
 // ---- Root ----
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem('access_token'));
+  const [loggedIn, setLoggedIn] = useState(() => hasValidAccessToken());
 
-  return loggedIn
-    ? <ChatApp onLogout={() => setLoggedIn(false)} />
-    : <AuthPage onLogin={() => setLoggedIn(true)} />;
+  useEffect(() => {
+    if (!hasValidAccessToken()) {
+      clearAuthTokens();
+    }
+  }, []);
+
+  if (!loggedIn) {
+    return <AuthPage onLogin={() => setLoggedIn(true)} />;
+  }
+
+  return (
+    <AppErrorBoundary>
+      <ChatApp onLogout={() => setLoggedIn(false)} />
+    </AppErrorBoundary>
+  );
 }

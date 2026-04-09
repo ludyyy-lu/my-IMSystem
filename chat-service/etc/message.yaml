@@ -10,9 +10,10 @@ Kafka:
     - localhost:9094
   Topic: im-chat-topic
   Group: chat-group
+  ReadReceiptTopic: ""
 
 Mysql:
-  DataSource: imuser:im123456@tcp(localhost:3307)/im?charset=utf8mb4&parseTime=True&loc=Local
+  DataSource: goxygen:pass@tcp(localhost:3308)/im?charset=utf8mb4&parseTime=True&loc=Local
 
 FriendRpc:
   Etcd:

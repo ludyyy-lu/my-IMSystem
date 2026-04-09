@@ -32,7 +32,7 @@ auth-service     chat-service (message.rpc)
 user-service (:8083)       ← 独立用户信息 RPC 服务
 
 ──── 基础设施 ────
-MySQL      :3307  (宿主机) / :3306 (容器内)
+MySQL      :3308  (宿主机) / :3306 (容器内)
 Redis      :6379
 etcd       :2379
 Kafka      :9094  (宿主机外部监听) / :9092 (容器内部)
@@ -229,7 +229,7 @@ docker exec im-kafka kafka-topics.sh \
 
 ```bash
 # MySQL
-mysql -h 127.0.0.1 -P 3307 -u imuser -pim123456 im -e "SELECT 1"
+mysql -h 127.0.0.1 -P 3308 -u goxygen -ppass im -e "SELECT 1"
 
 # Redis
 redis-cli -h 127.0.0.1 ping   # 期望: PONG
@@ -298,7 +298,7 @@ Starting server at 0.0.0.0:8888...
 | chat-service | 8081 | — | gRPC，注册到 etcd key=`message.rpc` |
 | friend-service | 8082 | — | gRPC，注册到 etcd key=`friend.rpc` |
 | user-service | 8083 | — | gRPC，注册到 etcd key=`user.rpc` |
-| MySQL | 3307 | 3306 | 宿主机通过 3307 访问 |
+| MySQL | 3308 | 3306 | 宿主机通过 3308 访问 |
 | Redis | 6379 | 6379 | |
 | etcd | 2379 | 2379 | |
 | Kafka（内部） | — | 9092 | 仅供容器内（服务间）使用 |
@@ -346,8 +346,8 @@ kill <PID>
 ### Q2: `failed to connect DB`
 
 - 检查 MySQL 容器是否正常运行：`docker compose ps`
-- 确认端口映射：宿主机 3307 → 容器 3306
-- 手动测试连接：`mysql -h 127.0.0.1 -P 3307 -u imuser -pim123456`
+- 确认端口映射：宿主机 3308 → 容器 3306
+- 手动测试连接：`mysql -h 127.0.0.1 -P 3308 -u goxygen -ppass`
 - 确认数据库 `im` 已自动创建（由 docker-compose 环境变量 `MYSQL_DATABASE` 控制）
 
 ### Q3: Kafka 连接超时 / `dial tcp: no route to host`

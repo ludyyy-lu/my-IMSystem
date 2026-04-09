@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"path"
 	"strconv"
 
 	"my-IMSystem/api-gateway/internal/middleware"
@@ -17,7 +18,7 @@ func parseInt64(s string) (int64, error) {
 func GetChatHistoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.GetUserID(r)
-		peerIDStr := r.PathValue("peer_id")
+		peerIDStr := path.Base(r.URL.Path)
 		peerID, err := parseInt64(peerIDStr)
 		if err != nil {
 			respondJSON(w, http.StatusBadRequest, "invalid peer_id", nil)

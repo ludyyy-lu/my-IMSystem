@@ -20,8 +20,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err != nil {
 		log.Fatalf("failed to connect DB: %v", err)
 	}
-	// 自动建表
-	err = db.AutoMigrate(&model.FriendRequest{}, &model.Friend{},&model.BlockedUser{}, &model.User{})
+	// 仅迁移 friend-service 自己维护的表，避免改写 users 表结构。
+	err = db.AutoMigrate(&model.FriendRequest{}, &model.Friend{}, &model.BlockedUser{})
 	if err != nil {
 		log.Fatalf("auto migration failed: %v", err)
 	}

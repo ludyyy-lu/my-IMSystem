@@ -27,7 +27,7 @@ func NewVerifyTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Verif
 // 校验 token 是否有效
 func (l *VerifyTokenLogic) VerifyToken(in *auth_auth.VerifyTokenReq) (*auth_auth.VerifyTokenResp, error) {
 	// todo: add your logic here and delete this line
-	claims, err := jwt.ParseToken(in.AccessToken, l.svcCtx.Config.JwtAuth.AccessSecret)
+	claims, err := jwt.ParseToken(in.AccessToken, l.svcCtx.JwtSecretKey)
 	if err != nil {
 		// Token 无效，返回 valid = false
 		return &auth_auth.VerifyTokenResp{
