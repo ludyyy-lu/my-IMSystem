@@ -5,9 +5,11 @@ package router
 import (
 "context"
 "encoding/json"
+"fmt"
 "time"
 
 "my-IMSystem/chat-service/chat"
+"my-IMSystem/common/common_model"
 "my-IMSystem/common/kafka"
 "my-IMSystem/ws-gateway/internal/model"
 "my-IMSystem/ws-gateway/internal/svc"
@@ -34,14 +36,24 @@ logx.Errorf("unknown message type from user %d: %s", userID, msg.Type)
 }
 }
 
-// handleChat forwards a chat message to Kafka for async processing by chat-service.
+// handleChat forwards a chat message to Kafka for async processing by chat-service
+// and for real-time push to the receiver via the ws-gateway consumer.
 func handleChat(svcCtx *svc.ServiceContext, fromUserID int64, msg model.WsMessage) {
-msg.From = fromUserID
 if svcCtx.Config.Kafka.Topic == "" {
 logx.Error("Kafka chat topic is not configured")
 return
 }
-if err := kafka.SendMessage(svcCtx.Config.Kafka.Topic, msg); err != nil {
+// Build a properly-typed ChatMessage so both the chat-service consumer
+// (saves to DB) and the ws-gateway push consumer (delivers in real-time)
+// can parse from_user_id / to_user_id correctly.
+chatMsg := common_model.ChatMessage{
+MessageId:  fmt.Sprintf("%d_%d_%d", fromUserID, msg.To, time.Now().UnixNano()),
+FromUserId: fromUserID,
+ToUserId:   msg.To,
+Content:    msg.Content,
+Timestamp:  time.Now().Unix(),
+}
+if err := kafka.SendMessage(svcCtx.Config.Kafka.Topic, chatMsg); err != nil {
 logx.Errorf("failed to enqueue chat message to Kafka: %v", err)
 }
 }

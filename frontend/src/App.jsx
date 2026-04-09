@@ -287,9 +287,9 @@ function ChatApp({ onLogout }) {
   useEffect(() => {
     if (tab === 'requests') {
       if (requestsSubTab === 'received') {
-        api.getFriendRequests().then((data) => setRequests(normalizeArray(data))).catch(() => {});
+        api.getFriendRequests().then((data) => setRequests(normalizeArray(data))).catch(() => setRequests([]));
       } else {
-        api.getSentFriendRequests().then((data) => setSentRequests(normalizeArray(data))).catch(() => {});
+        api.getSentFriendRequests().then((data) => setSentRequests(normalizeArray(data))).catch(() => setSentRequests([]));
       }
     }
   }, [tab, requestsSubTab]);
@@ -352,6 +352,7 @@ function ChatApp({ onLogout }) {
   function selectFriend(f) {
     setSelectedFriend(f);
     setUnread((prev) => ({ ...prev, [f.friend_id]: 0 }));
+    setMessages([]); // clear stale messages while new history loads
     api.getChatHistory(f.friend_id).then((msgs) => {
       setMessages(msgs || []);
     }).catch(() => setMessages([]));

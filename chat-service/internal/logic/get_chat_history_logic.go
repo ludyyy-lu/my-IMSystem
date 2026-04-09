@@ -41,17 +41,23 @@ func (l *GetChatHistoryLogic) GetChatHistory(in *chat_chat.GetChatHistoryReq) (*
 		return nil, err
 	}
 
-	// 3. 转换成消息响应格式
+	// 3. 转换成消息响应格式，同时将倒序结果翻转为正序（从旧到新）
 	var resp []*chat_chat.ChatMessage
 	for _, m := range msgs {
 		resp = append(resp, &chat_chat.ChatMessage{
 			FromUserId: m.FromUserId,
 			ToUserId:   m.ToUserId,
 			Content:    m.Content,
-			Timestamp:  m.CreatedAt.UnixMilli(),
+			Timestamp:  m.CreatedAt.Unix(),
 			MessageId:  strconv.FormatInt(m.Id, 10),
 			IsRead:     m.Status == 1,
 		})
+	}
+	// GetChatMessages returns rows in DESC order (newest first) for efficient
+	// pagination; reverse here so the caller receives chronological (oldest first)
+	// order, which matches how chat UIs append messages.
+	for i, j := 0, len(resp)-1; i < j; i, j = i+1, j-1 {
+		resp[i], resp[j] = resp[j], resp[i]
 	}
 	return &chat_chat.GetChatHistoryResp{
 		Messages: resp,
