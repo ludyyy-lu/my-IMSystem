@@ -15,6 +15,7 @@ type (
 	Friend interface {
 		SendFriendRequest(ctx context.Context, in *SendFriendRequestRequest, opts ...grpc.CallOption) (*SendFriendRequestResponse, error)
 		GetFriendRequests(ctx context.Context, in *GetFriendRequestsRequest, opts ...grpc.CallOption) (*GetFriendRequestsResponse, error)
+		GetSentFriendRequests(ctx context.Context, in *GetFriendRequestsRequest, opts ...grpc.CallOption) (*GetFriendRequestsResponse, error)
 		RespondFriendRequest(ctx context.Context, in *RespondFriendRequestRequest, opts ...grpc.CallOption) (*RespondFriendRequestResponse, error)
 		GetFriends(ctx context.Context, in *GetFriendsRequest, opts ...grpc.CallOption) (*GetFriendsResponse, error)
 		DeleteFriend(ctx context.Context, in *DeleteFriendRequest, opts ...grpc.CallOption) (*DeleteFriendResponse, error)
@@ -43,6 +44,11 @@ func (m *defaultFriend) SendFriendRequest(ctx context.Context, in *SendFriendReq
 func (m *defaultFriend) GetFriendRequests(ctx context.Context, in *GetFriendRequestsRequest, opts ...grpc.CallOption) (*GetFriendRequestsResponse, error) {
 	client := NewFriendClient(m.cli.Conn())
 	return client.GetFriendRequests(ctx, in, opts...)
+}
+
+func (m *defaultFriend) GetSentFriendRequests(ctx context.Context, in *GetFriendRequestsRequest, opts ...grpc.CallOption) (*GetFriendRequestsResponse, error) {
+	client := NewFriendClient(m.cli.Conn())
+	return client.GetSentFriendRequests(ctx, in, opts...)
 }
 
 func (m *defaultFriend) RespondFriendRequest(ctx context.Context, in *RespondFriendRequestRequest, opts ...grpc.CallOption) (*RespondFriendRequestResponse, error) {

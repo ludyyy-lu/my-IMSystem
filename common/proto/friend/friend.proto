@@ -114,6 +114,7 @@ message IsBlockedResp {
 service Friend {
   rpc SendFriendRequest(SendFriendRequestRequest) returns (SendFriendRequestResponse);
   rpc GetFriendRequests(GetFriendRequestsRequest) returns (GetFriendRequestsResponse);
+  rpc GetSentFriendRequests(GetFriendRequestsRequest) returns (GetFriendRequestsResponse);
   rpc RespondFriendRequest(RespondFriendRequestRequest) returns (RespondFriendRequestResponse);
   rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
   rpc DeleteFriend(DeleteFriendRequest) returns (DeleteFriendResponse);

@@ -496,3 +496,131 @@
 .bootstrap-card button:hover {
   background: #5a67d8;
 }
+
+/* Requests sub-tabs */
+.requests-subtabs {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0 12px;
+  background: #f8f9fa;
+}
+
+.requests-subtab {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.requests-subtab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  font-weight: 600;
+}
+
+/* Profile panel */
+.profile-panel {
+  padding: 20px 16px;
+}
+
+.profile-view,
+.profile-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.profile-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile-id {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.profile-bio {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  max-width: 180px;
+}
+
+.profile-gender {
+  font-size: 12px;
+  color: #888;
+}
+
+.profile-edit-btn {
+  margin-top: 12px;
+  padding: 8px 24px;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.profile-edit-btn:hover {
+  background: #5a67d8;
+}
+
+.profile-edit {
+  width: 100%;
+  align-items: stretch;
+}
+
+.profile-edit label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.profile-edit input,
+.profile-edit textarea,
+.profile-edit select {
+  padding: 8px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.profile-edit input:focus,
+.profile-edit textarea:focus,
+.profile-edit select:focus {
+  border-color: #667eea;
+}
+
+.profile-edit-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.profile-edit-btns button {
+  flex: 1;
+}

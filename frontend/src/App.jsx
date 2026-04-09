@@ -212,9 +212,11 @@ function ChatApp({ onLogout }) {
   const token = localStorage.getItem('access_token');
   const myId = getMyId();
 
-  const [tab, setTab] = useState('friends'); // 'friends' | 'requests' | 'search'
+  const [tab, setTab] = useState('friends'); // 'friends' | 'requests' | 'search' | 'profile'
+  const [requestsSubTab, setRequestsSubTab] = useState('received'); // 'received' | 'sent'
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState(null); // { friend_id, username }
@@ -222,6 +224,10 @@ function ChatApp({ onLogout }) {
   const [inputText, setInputText] = useState('');
   const [unread, setUnread] = useState({}); // { peer_id: count }
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [myProfile, setMyProfile] = useState(null);
+  const [profileEdit, setProfileEdit] = useState(false);
+  const [profileForm, setProfileForm] = useState({ nickname: '', avatar: '', bio: '', gender: 0 });
+  const [profileSaving, setProfileSaving] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Handle incoming WebSocket messages
@@ -280,9 +286,25 @@ function ChatApp({ onLogout }) {
   // Load pending requests when switching to requests tab
   useEffect(() => {
     if (tab === 'requests') {
-      api.getFriendRequests().then((data) => setRequests(normalizeArray(data))).catch(() => {});
+      if (requestsSubTab === 'received') {
+        api.getFriendRequests().then((data) => setRequests(normalizeArray(data))).catch(() => {});
+      } else {
+        api.getSentFriendRequests().then((data) => setSentRequests(normalizeArray(data))).catch(() => {});
+      }
     }
-  }, [tab]);
+  }, [tab, requestsSubTab]);
+
+  // Load profile when switching to profile tab (always refresh to show latest data)
+  useEffect(() => {
+    if (tab === 'profile') {
+      api.getMyProfile().then((data) => {
+        setMyProfile(data);
+        if (!profileEdit) {
+          setProfileForm({ nickname: data.nickname || '', avatar: data.avatar || '', bio: data.bio || '', gender: data.gender || 0 });
+        }
+      }).catch(() => {});
+    }
+  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search - debounced, timeout handles both empty and non-empty cases
   useEffect(() => {
@@ -372,6 +394,20 @@ function ChatApp({ onLogout }) {
     }
   }
 
+  async function handleSaveProfile() {
+    setProfileSaving(true);
+    try {
+      await api.updateProfile(profileForm);
+      const updated = await api.getMyProfile();
+      setMyProfile(updated);
+      setProfileEdit(false);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
   async function handleAddFriend(userId) {
     try {
       await api.sendFriendRequest(userId, '你好，我想加你为好友');
@@ -397,13 +433,13 @@ function ChatApp({ onLogout }) {
         </div>
 
         <div className="sidebar-tabs">
-          {['friends', 'requests', 'search'].map((t) => (
+          {['friends', 'requests', 'search', 'profile'].map((t) => (
             <div
               key={t}
               className={`sidebar-tab ${tab === t ? 'active' : ''}`}
               onClick={() => setTab(t)}
             >
-              {t === 'friends' ? '好友' : t === 'requests' ? '申请' : '搜索'}
+              {t === 'friends' ? '好友' : t === 'requests' ? '申请' : t === 'search' ? '搜索' : '我的'}
             </div>
           ))}
         </div>
@@ -443,7 +479,20 @@ function ChatApp({ onLogout }) {
           )}
 
           {/* Requests tab */}
-          {tab === 'requests' && requests.filter(r => r.status === 'PENDING').map((req) => (
+          {tab === 'requests' && (
+            <div className="requests-subtabs">
+              <span
+                className={`requests-subtab ${requestsSubTab === 'received' ? 'active' : ''}`}
+                onClick={() => setRequestsSubTab('received')}
+              >收到的</span>
+              <span
+                className={`requests-subtab ${requestsSubTab === 'sent' ? 'active' : ''}`}
+                onClick={() => setRequestsSubTab('sent')}
+              >发出的</span>
+            </div>
+          )}
+
+          {tab === 'requests' && requestsSubTab === 'received' && requests.filter(r => r.status === 'pending').map((req) => (
             <div key={req.request_id} className="request-item">
               <div className="request-info">来自：{req.from_username || `用户 ${req.from_user_id}`}</div>
               {req.remark && <div className="request-remark">{req.remark}</div>}
@@ -453,9 +502,68 @@ function ChatApp({ onLogout }) {
               </div>
             </div>
           ))}
-          {tab === 'requests' && requests.filter(r => r.status === 'PENDING').length === 0 && (
+          {tab === 'requests' && requestsSubTab === 'received' && requests.filter(r => r.status === 'pending').length === 0 && (
             <div style={{ padding: '20px', color: '#aaa', textAlign: 'center', fontSize: 13 }}>
-              暂无好友申请
+              暂无待处理的好友申请
+            </div>
+          )}
+
+          {tab === 'requests' && requestsSubTab === 'sent' && sentRequests.map((req) => {
+            const statusLabel = { pending: '待对方确认', accepted: '已接受', rejected: '已拒绝' }[req.status] || req.status;
+            const statusColor = { pending: '#f0ad4e', accepted: '#5cb85c', rejected: '#d9534f' }[req.status] || '#aaa';
+            // Note: backend reuses from_user_id field to carry recipient (to_user_id) for sent requests
+            const recipientId = req.from_user_id;
+            return (
+              <div key={req.request_id} className="request-item">
+                <div className="request-info">发给：{req.from_username || `用户 ${recipientId}`}</div>
+                {req.remark && <div className="request-remark">附言：{req.remark}</div>}
+                <div style={{ fontSize: 12, color: statusColor, marginTop: 4 }}>状态：{statusLabel}</div>
+              </div>
+            );
+          })}
+          {tab === 'requests' && requestsSubTab === 'sent' && sentRequests.length === 0 && (
+            <div style={{ padding: '20px', color: '#aaa', textAlign: 'center', fontSize: 13 }}>
+              暂无发出的好友申请
+            </div>
+          )}
+
+          {/* Profile tab */}
+          {tab === 'profile' && (
+            <div className="profile-panel">
+              {myProfile ? (
+                profileEdit ? (
+                  <div className="profile-edit">
+                    <div className="profile-avatar-lg">{avatarChar(profileForm.nickname || String(myId))}</div>
+                    <label>昵称</label>
+                    <input value={profileForm.nickname} onChange={e => setProfileForm(f => ({...f, nickname: e.target.value}))} />
+                    <label>头像 URL</label>
+                    <input value={profileForm.avatar} onChange={e => setProfileForm(f => ({...f, avatar: e.target.value}))} placeholder="头像链接（可选）" />
+                    <label>个人简介</label>
+                    <textarea rows={3} value={profileForm.bio} onChange={e => setProfileForm(f => ({...f, bio: e.target.value}))} placeholder="介绍一下自己…" />
+                    <label>性别</label>
+                    <select value={profileForm.gender} onChange={e => setProfileForm(f => ({...f, gender: parseInt(e.target.value)}))}>
+                      <option value={0}>保密</option>
+                      <option value={1}>男</option>
+                      <option value={2}>女</option>
+                    </select>
+                    <div className="profile-edit-btns">
+                      <button className="btn-accept" disabled={profileSaving} onClick={handleSaveProfile}>{profileSaving ? '保存中…' : '保存'}</button>
+                      <button className="btn-reject" onClick={() => { setProfileEdit(false); setProfileForm({ nickname: myProfile.nickname || '', avatar: myProfile.avatar || '', bio: myProfile.bio || '', gender: myProfile.gender || 0 }); }}>取消</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="profile-view">
+                    <div className="profile-avatar-lg">{avatarChar(myProfile.nickname || String(myId))}</div>
+                    <div className="profile-name">{myProfile.nickname || `用户 ${myId}`}</div>
+                    <div className="profile-id">ID: {myProfile.id || myId}</div>
+                    {myProfile.bio && <div className="profile-bio">{myProfile.bio}</div>}
+                    <div className="profile-gender">{['保密', '男', '女'][myProfile.gender] || '保密'}</div>
+                    <button className="profile-edit-btn" onClick={() => setProfileEdit(true)}>编辑资料</button>
+                  </div>
+                )
+              ) : (
+                <div style={{ padding: '20px', color: '#aaa', textAlign: 'center', fontSize: 13 }}>加载中…</div>
+              )}
             </div>
           )}
 

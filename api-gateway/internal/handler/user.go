@@ -10,6 +10,19 @@ import (
 	userpb "my-IMSystem/user-service/user"
 )
 
+// GetMyProfileHandler handles GET /api/users/me – returns the authenticated user's own profile.
+func GetMyProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.GetUserID(r)
+		resp, err := svcCtx.UserRpc.GetProfile(r.Context(), &userpb.GetProfileReq{Uid: userID})
+		if err != nil {
+			respondJSON(w, http.StatusInternalServerError, err.Error(), nil)
+			return
+		}
+		respondJSON(w, http.StatusOK, "success", resp.User)
+	}
+}
+
 // GetProfileHandler handles GET /api/users/:id
 // Path parameter :id is extracted from the URL path.
 func GetProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
