@@ -41,7 +41,7 @@ func (l *GetChatHistoryLogic) GetChatHistory(in *chat_chat.GetChatHistoryReq) (*
 		return nil, err
 	}
 
-	// 3. 转换成消息响应格式，同时将倒序结果翻转为正序（从旧到新）
+	// 3. Convert to message response format and reverse the DESC result to chronological order (oldest first).
 	var resp []*chat_chat.ChatMessage
 	for _, m := range msgs {
 		resp = append(resp, &chat_chat.ChatMessage{

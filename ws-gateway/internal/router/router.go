@@ -6,6 +6,7 @@ import (
 "context"
 "encoding/json"
 "fmt"
+"sync/atomic"
 "time"
 
 "my-IMSystem/chat-service/chat"
@@ -16,6 +17,10 @@ import (
 
 "github.com/zeromicro/go-zero/core/logx"
 )
+
+// msgSeq is an atomic counter used to ensure unique MessageId values even when
+// two messages are sent within the same nanosecond.
+var msgSeq int64
 
 // HandleMessage parses payload and dispatches to the correct handler.
 func HandleMessage(svcCtx *svc.ServiceContext, userID int64, payload []byte) {
@@ -47,7 +52,7 @@ return
 // (saves to DB) and the ws-gateway push consumer (delivers in real-time)
 // can parse from_user_id / to_user_id correctly.
 chatMsg := common_model.ChatMessage{
-MessageId:  fmt.Sprintf("%d_%d_%d", fromUserID, msg.To, time.Now().UnixNano()),
+MessageId:  fmt.Sprintf("%d_%d_%d_%d", fromUserID, msg.To, time.Now().UnixNano(), atomic.AddInt64(&msgSeq, 1)),
 FromUserId: fromUserID,
 ToUserId:   msg.To,
 Content:    msg.Content,
