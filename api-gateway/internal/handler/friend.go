@@ -84,6 +84,19 @@ func RespondFriendRequestHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
+// GetSentFriendRequestsHandler handles GET /api/friends/requests/sent
+func GetSentFriendRequestsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.GetUserID(r)
+		resp, err := svcCtx.FriendRpc.GetSentFriendRequests(r.Context(), &friendpb.GetFriendRequestsRequest{UserId: userID})
+		if err != nil {
+			respondJSON(w, http.StatusInternalServerError, err.Error(), nil)
+			return
+		}
+		respondJSON(w, http.StatusOK, "success", resp.Requests)
+	}
+}
+
 // DeleteFriendHandler handles DELETE /api/friends/:id
 func DeleteFriendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

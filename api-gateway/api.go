@@ -65,6 +65,11 @@ func main() {
 		// User
 		{
 			Method:  http.MethodGet,
+			Path:    "/api/users/me",
+			Handler: auth(handler.GetMyProfileHandler(ctx)),
+		},
+		{
+			Method:  http.MethodGet,
 			Path:    "/api/users/search",
 			Handler: auth(handler.SearchUserHandler(ctx)),
 		},
@@ -88,6 +93,11 @@ func main() {
 			Method:  http.MethodGet,
 			Path:    "/api/friends/requests",
 			Handler: auth(handler.GetFriendRequestsHandler(ctx)),
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/api/friends/requests/sent",
+			Handler: auth(handler.GetSentFriendRequestsHandler(ctx)),
 		},
 		{
 			Method:  http.MethodPost,

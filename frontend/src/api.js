@@ -32,13 +32,16 @@ export const api = {
 
   getFriends: () => request('GET', '/api/friends'),
   getFriendRequests: () => request('GET', '/api/friends/requests'),
+  getSentFriendRequests: () => request('GET', '/api/friends/requests/sent'),
   sendFriendRequest: (to_user_id, remark = '') =>
     request('POST', '/api/friends/request', { to_user_id, remark }),
   respondFriendRequest: (request_id, action) =>
     request('PUT', '/api/friends/request', { request_id, action }),
 
   searchUser: (keyword) => request('GET', `/api/users/search?keyword=${encodeURIComponent(keyword)}`),
+  getMyProfile: () => request('GET', '/api/users/me'),
   getProfile: (id) => request('GET', `/api/users/${id}`),
+  updateProfile: (data) => request('PUT', '/api/users/profile', data),
 
   getChatHistory: (peer_id, limit = 50) =>
     request('GET', `/api/messages/${peer_id}?limit=${limit}`),

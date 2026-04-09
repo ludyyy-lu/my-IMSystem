@@ -29,9 +29,13 @@ func NewSendFriendRequestLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *SendFriendRequestLogic) SendFriendRequest(in *friend_friend.SendFriendRequestRequest) (*friend_friend.SendFriendRequestResponse, error) {
-	// todo: add your logic here and delete this line
 	db := l.svcCtx.DB
-	// Step 0: 检查是否被拉黑
+	// Step 0: 禁止自己给自己发送好友申请
+	if in.FromUserId == in.ToUserId {
+		return nil, errors.New("不能向自己发送好友申请")
+	}
+
+	// Step 1: 检查是否被拉黑
 	// 添加好友可以直接查询好友库，但是chat服务就不行，微服务，所以用rpc跨服务调用
 	// 此处直接查询数据库
 	var blockedUser model.BlockedUser
@@ -39,21 +43,21 @@ func (l *SendFriendRequestLogic) SendFriendRequest(in *friend_friend.SendFriendR
 		return nil, errors.New("对方已将你拉黑，无法发送好友请求")
 	}
 
-	// Step 1: 检查是否已经是好友
+	// Step 2: 检查是否已经是好友
 	var existingFriend model.Friend
 	if err := db.Where("(user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)",
 		in.FromUserId, in.ToUserId, in.ToUserId, in.FromUserId).First(&existingFriend).Error; err == nil {
 		return nil, errors.New("你们已经是好友了")
 	}
 
-	// Step 2: 检查是否已发送过请求
+	// Step 3: 检查是否已发送过请求
 	var existingRequest model.FriendRequest
 	if err := db.Where("from_user_id = ? AND to_user_id = ? AND status = ?", in.FromUserId, in.ToUserId, "pending").
 		First(&existingRequest).Error; err == nil {
 		return nil, errors.New("已经发送过好友请求了")
 	}
 
-	// Step 3: 创建好友请求
+	// Step 4: 创建好友请求
 	request := model.FriendRequest{
 		FromUserID: in.FromUserId,
 		ToUserID:   in.ToUserId,

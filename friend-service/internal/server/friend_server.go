@@ -33,6 +33,11 @@ func (s *FriendServer) GetFriendRequests(ctx context.Context, in *friend_friend.
 	return l.GetFriendRequests(in)
 }
 
+func (s *FriendServer) GetSentFriendRequests(ctx context.Context, in *friend_friend.GetFriendRequestsRequest) (*friend_friend.GetFriendRequestsResponse, error) {
+	l := logic.NewGetSentFriendRequestsLogic(ctx, s.svcCtx)
+	return l.GetSentFriendRequests(in)
+}
+
 func (s *FriendServer) RespondFriendRequest(ctx context.Context, in *friend_friend.RespondFriendRequestRequest) (*friend_friend.RespondFriendRequestResponse, error) {
 	l := logic.NewRespondFriendRequestLogic(ctx, s.svcCtx)
 	return l.RespondFriendRequest(in)
